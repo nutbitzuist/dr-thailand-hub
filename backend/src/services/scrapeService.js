@@ -310,11 +310,18 @@ function getIssuerCodeFromSuffix(symbol) {
   if (symbol.endsWith('06')) return 'KKP';     // Kiatnakin Phatra
   if (symbol.endsWith('24')) return 'FSS';     // Finansia Syrus
   if (symbol.endsWith('29')) return 'PI';      // PI Securities
+  if (symbol.endsWith('03')) return 'PI';      // PI Securities (alternate)
+  if (symbol.endsWith('23')) return 'INVX';    // InnovestX
+  if (symbol.endsWith('27')) return 'INVX';    // InnovestX (alternate)
   if (symbol.endsWith('41')) return 'JPM';     // JPMorgan
   if (symbol.endsWith('28')) return 'MQ';      // Macquarie
   if (symbol.endsWith('08')) return 'ASPS';    // Asia Plus
   if (symbol.endsWith('16')) return 'TNS';     // Thanachart
-  return 'OTHER';
+  if (symbol.endsWith('42')) return 'CITI';    // Citibank
+  if (symbol.endsWith('11')) return 'KS';      // KS Securities
+  // Return the suffix itself for unmapped codes
+  const suffix = symbol.match(/\d+$/)?.[0];
+  return suffix ? `CODE${suffix}` : 'OTHER';
 }
 
 function getIssuerName(code) {
@@ -330,9 +337,16 @@ function getIssuerName(code) {
     'FSS': 'บล.ฟินันเซีย ไซรัส',
     'ASPS': 'บล.เอเซีย พลัส',
     'TNS': 'บล.ธนชาต',
-    'PI': 'บล.พาย'
+    'PI': 'บล.พาย',
+    'CITI': 'Citibank',
+    'KS': 'KS Securities'
   };
-  return map[code] || 'Unknown';
+  // Return mapped name, or show code suffix for unmapped
+  if (map[code]) return map[code];
+  if (code && code.startsWith('CODE')) {
+    return `รหัส ${code.replace('CODE', '')}`;
+  }
+  return 'ไม่ระบุ';
 }
 
 // Load initial/fallback data
