@@ -517,38 +517,61 @@ async function scrapeAll() {
   await updateMarketExtraData();
 }
 
+const puppeteer = require('puppeteer');
+
 // Update extra market data (overview, rankings)
 async function updateMarketExtraData() {
+  let browser = null;
   try {
-    console.log('Updating extra market data (overview, rankings)...');
+    console.log('Updating extra market data via Puppeteer...');
+
+    browser = await puppeteer.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      headless: 'new'
+    });
+
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
     // 1. Market Overview
-    const overviewRes = await axios.get('https://www.set.or.th/api/set/dr/market-overview', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://www.set.or.th/th/market/product/dr/overview'
-      }
-    });
-    if (overviewRes.data) {
-      marketOverview = overviewRes.data;
+    console.log('Fetching Market Overview...');
+    try {
+      await page.goto('https://www.set.or.th/api/set/dr/market-overview', { waitUntil: 'networkidle0' });
+      const content = await page.evaluate(() => document.body.innerText);
+      marketOverview = JSON.parse(content);
+    } catch (e) {
+      console.error('Failed to fetch Market Overview with Puppeteer:', e.message);
     }
 
     // 2. Rankings
-    const [gainers, losers, active] = await Promise.all([
-      axios.get('https://www.set.or.th/api/set/ranking/topGainer/SET/X?count=10', { headers: { 'User-Agent': 'Mozilla/5.0' } }).catch(() => ({ data: [] })),
-      axios.get('https://www.set.or.th/api/set/ranking/topLoser/SET/X?count=10', { headers: { 'User-Agent': 'Mozilla/5.0' } }).catch(() => ({ data: [] })),
-      axios.get('https://www.set.or.th/api/set/ranking/mostActiveValue/SET/X?count=10', { headers: { 'User-Agent': 'Mozilla/5.0' } }).catch(() => ({ data: [] }))
-    ]);
-
-    rankings = {
-      topGainers: gainers.data || [],
-      topLosers: losers.data || [],
-      mostActiveValue: active.data || []
+    console.log('Fetching Rankings...');
+    const fetchRanking = async (url) => {
+      try {
+        await page.goto(url, { waitUntil: 'networkidle0' });
+        const content = await page.evaluate(() => document.body.innerText);
+        return JSON.parse(content);
+      } catch (e) {
+        console.error(`Failed to fetch ranking from ${url}:`, e.message);
+        return [];
+      }
     };
 
-    console.log('Extra market data update completed');
+    const gainersData = await fetchRanking('https://www.set.or.th/api/set/ranking/topGainer/SET/X?count=10');
+    const losersData = await fetchRanking('https://www.set.or.th/api/set/ranking/topLoser/SET/X?count=10');
+    const activeData = await fetchRanking('https://www.set.or.th/api/set/ranking/mostActiveValue/SET/X?count=10');
+
+    rankings = {
+      topGainers: gainersData || [],
+      topLosers: losersData || [],
+      mostActiveValue: activeData || []
+    };
+
+    console.log('Extra market data update completed via Puppeteer');
   } catch (error) {
-    console.error('Error updating extra market data:', error.message);
+    console.error('Error updating extra market data with Puppeteer:', error.message);
+  } finally {
+    if (browser) await browser.close();
   }
 }
 
@@ -556,11 +579,14 @@ async function updateMarketExtraData() {
 async function getDRNews(symbol) {
   try {
     const res = await axios.get(`https://www.set.or.th/api/set/news/${symbol}/list?lang=th&limit=10`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.set.or.th/th/market/product/dr/overview'
+      }
     });
     return res.data || [];
   } catch (error) {
-    console.error(`Error fetching news for ${symbol}:`, error.message);
+    console.error(`Error fetching news for ${symbol} with axios:`, error.message);
     return [];
   }
 }
