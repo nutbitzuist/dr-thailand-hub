@@ -65,19 +65,25 @@ function detectCountry(market, underlying, symbol) {
   return 'US'; // Default
 }
 
-// Determine trading hours based on market
+// Determine trading hours based on market, country, and underlying
 // US/EU markets: Day (10:00-16:30) + Night (19:00-03:00)
 // Asian markets: Day only (10:00-16:30)
-function detectTradingHours(market, country) {
+function detectTradingHours(market, country, underlying) {
   if (!market) market = '';
+  if (!underlying) underlying = '';
   market = market.toUpperCase();
+  underlying = underlying.toUpperCase();
 
   // US and European markets have night trading
   const nightTradingMarkets = ['NASDAQ', 'NYSE', 'US', 'EURONEXT', 'LSE', 'XETRA', 'PARIS', 'AMSTERDAM'];
   const nightTradingCountries = ['US', 'EU'];
 
+  // US stock symbols that definitely have night trading
+  const usStockPatterns = /^(AAPL|MSFT|GOOGL|GOOG|META|AMZN|NVDA|TSLA|NFLX|AMD|INTC|COIN|PLTR|UBER|SHOP|SQ|PYPL|CRM|ORCL|ADBE|DIS|V|MA|JPM|BAC|WMT|PG|JNJ|UNH|HD|KO|PEP|MCD|NKE|SBUX|COST|TGT|CVS|WBA|XOM|CVX|COP|MRK|PFE|ABBV|LLY|TMO|ABT|BMY|GILD)/;
+
   const hasNightTrading = nightTradingMarkets.some(m => market.includes(m)) ||
-    nightTradingCountries.includes(country);
+    nightTradingCountries.includes(country) ||
+    usStockPatterns.test(underlying);
 
   if (hasNightTrading) {
     return {
@@ -235,7 +241,7 @@ async function scrapeSET() {
         lastUpdate: new Date().toISOString()
       })).map(dr => {
         const country = detectCountry(dr.market, dr.underlying, dr.symbol);
-        const tradingHoursInfo = detectTradingHours(dr.market, country);
+        const tradingHoursInfo = detectTradingHours(dr.market, country, dr.underlying);
         return {
           ...dr,
           country,
@@ -526,7 +532,7 @@ function getFallbackDRData() {
     const issuerCode = getIssuerCodeFromSuffix(item.symbol);
     const issuer = getIssuerName(issuerCode);
     const country = detectCountry(item.market, item.underlying, item.symbol);
-    const tradingHoursInfo = detectTradingHours(item.market, country);
+    const tradingHoursInfo = detectTradingHours(item.market, country, item.underlying);
     return {
       ...item,
       country,

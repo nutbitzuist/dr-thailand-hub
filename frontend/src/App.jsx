@@ -287,8 +287,25 @@ const DRDetailModal = ({ dr, onClose }) => {
             </div>
 
             <div>
-              <h3 className="font-semibold text-black mb-3">🗞 ข่าวประชาสัมพันธ์</h3>
-              <NewsSection symbol={dr.symbol} />
+              <h3 className="font-semibold text-black mb-3">📈 ข้อมูลหุ้นอ้างอิง</h3>
+              <div className="bg-gray-50 border-2 border-black p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-brutalist-muted text-sm font-medium">หลักทรัพย์อ้างอิง</span>
+                  <span className="text-black font-bold">{dr.underlying || dr.symbol?.replace(/\d+$/, '')}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-brutalist-muted text-sm font-medium">ตลาด</span>
+                  <span className="text-black font-bold">{dr.market || 'N/A'}</span>
+                </div>
+                <a
+                  href={`https://finance.yahoo.com/quote/${dr.underlying || dr.symbol?.replace(/\d+$/, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full text-center bg-gray-100 border-2 border-black py-2 text-sm font-bold hover:bg-gray-200 transition-colors"
+                >
+                  ดูข้อมูลบน Yahoo Finance →
+                </a>
+              </div>
             </div>
           </div>
 
@@ -331,7 +348,7 @@ const HomePage = ({ setSelectedDR, drList, loading, marketOverview, rankings, br
             <button onClick={() => navigate('/screener')} className="px-6 py-3 bg-white border-3 border-black shadow-brutal text-black font-bold transition-all hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutal-lg">🔍 DR Screener</button>
           </div>
         </div>
-        <div className="absolute top-4 right-4 text-8xl opacity-20">📊</div>
+
       </div>
 
       <MarketPulse overview={marketOverview || {
@@ -479,7 +496,17 @@ const ComparePage = ({ compareList, setCompareList, drList }) => {
   const selectedData = selectedSymbols.map(symbol => drList.find(d => d.symbol === symbol)).filter(Boolean);
   const handleAdd = (symbol) => { if (selectedSymbols.length >= 4 || selectedSymbols.includes(symbol)) return; setSelectedSymbols([...selectedSymbols, symbol]); };
   const handleRemove = (symbol) => setSelectedSymbols(selectedSymbols.filter(s => s !== symbol));
-  const compareFields = [{ key: 'price', label: 'ราคา', format: (v) => `฿${v?.toLocaleString()}` }, { key: 'changePercent', label: '% เปลี่ยนแปลง', format: (v) => `${v > 0 ? '+' : ''}${v?.toFixed(2)}%`, highlight: true }, { key: 'volume', label: 'Volume', format: (v) => (v || 0).toLocaleString() }, { key: 'marketCap', label: 'Market Cap', format: (v) => `$${v || 'N/A'}B` }, { key: 'pe', label: 'P/E Ratio', format: (v) => v > 0 ? v?.toFixed(1) : 'N/A' }, { key: 'dividend', label: 'Dividend Yield', format: (v) => v > 0 ? `${v?.toFixed(2)}%` : '-' }, { key: 'sector', label: 'Sector', format: (v) => v }, { key: 'country', label: 'ประเทศ', format: (v) => countryNames[v] || v }, { key: 'issuer', label: 'ผู้ออก', format: (v) => v }, { key: 'tradingHours', label: 'เวลาซื้อขาย', format: (v) => v }];
+  const compareFields = [
+    { key: 'price', label: 'ราคา', format: (v) => `฿${v?.toLocaleString()}` },
+    { key: 'changePercent', label: '% เปลี่ยนแปลง', format: (v) => `${v > 0 ? '+' : ''}${v?.toFixed(2)}%`, highlight: true },
+    { key: 'volume', label: 'Volume', format: (v) => (v || 0).toLocaleString() },
+    { key: 'underlying', label: 'หลักทรัพย์อ้างอิง', format: (v) => v || '-' },
+    { key: 'ratio', label: 'อัตราแปลง', format: (v) => v || '-' },
+    { key: 'tradingHours', label: 'เวลาซื้อขาย', format: (v) => v || 'กลางวัน' },
+    { key: 'sector', label: 'Sector', format: (v) => v },
+    { key: 'country', label: 'ประเทศ', format: (v) => countryNames[v] || v },
+    { key: 'issuer', label: 'ผู้ออก', format: (v) => v }
+  ];
 
   return (
     <div className="animate-fade-in-up">
