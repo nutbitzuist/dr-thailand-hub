@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 // Helper function for API calls
 async function fetchAPI(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   try {
     const response = await fetch(url, {
       headers: {
@@ -84,6 +84,21 @@ export const drAPI = {
       method: 'POST',
       body: JSON.stringify(criteria)
     });
+  },
+
+  // Get market overview stats
+  getMarketOverview: async () => {
+    return fetchAPI('/dr/market-overview');
+  },
+
+  // Get market rankings
+  getRankings: async () => {
+    return fetchAPI('/dr/rankings');
+  },
+
+  // Get news for a specific DR
+  getNews: async (symbol) => {
+    return fetchAPI(`/dr/${symbol}/news`);
   }
 };
 
