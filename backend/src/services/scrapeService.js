@@ -472,16 +472,22 @@ function getFallbackDRData() {
     { symbol: 'SQ80', name: 'Block Inc.', underlying: 'SQ', market: 'NYSE', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 2.95, change: 0.10, changePercent: 3.51, volume: 310000, marketCap: 52, pe: 45.2, dividend: 0 },
     { symbol: 'PYPL80', name: 'PayPal Holdings', underlying: 'PYPL', market: 'NASDAQ', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 2.52, change: 0.04, changePercent: 1.61, volume: 280000, marketCap: 72, pe: 18.5, dividend: 0 },
     { symbol: 'CRM80', name: 'Salesforce Inc.', underlying: 'CRM', market: 'NYSE', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 11.25, change: 0.15, changePercent: 1.35, volume: 185000, marketCap: 285, pe: 42.8, dividend: 0 },
-    { symbol: 'ORCL80', name: 'Oracle Corporation', underlying: 'ORCL', market: 'NYSE', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 5.82, change: 0.08, changePercent: 1.39, volume: 165000, marketCap: 420, pe: 38.5, dividend: 1.25 },
-  ].map(item => ({
-    ...item,
-    country: detectCountry(item.market, item.underlying, item.symbol),
-    sector: detectSector(item.name, item.underlying),
-    issuerCode: getIssuerCode(item.issuer),
-    logo: getCompanyLogo(item.name, item.symbol),
-    value: item.price * item.volume,
-    lastUpdate: new Date().toISOString()
-  }));
+    { symbol: 'ORCL80', name: 'Oracle Corporation', underlying: 'ORCL', market: 'NYSE', issuer: 'ธ.กรุงไทย', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 5.82, change: 0.08, changePercent: 1.39, volume: 165000, marketCap: 420, pe: 38.5, dividend: 1.25 },
+  ].map(item => {
+    // Derive issuer code from symbol suffix (not from issuer text)
+    const issuerCode = getIssuerCodeFromSuffix(item.symbol);
+    const issuer = getIssuerName(issuerCode);
+    return {
+      ...item,
+      country: detectCountry(item.market, item.underlying, item.symbol),
+      sector: detectSector(item.name, item.underlying),
+      issuerCode: issuerCode,
+      issuer: issuer,  // Override with correct issuer name
+      logo: getCompanyLogo(item.name, item.symbol),
+      value: item.price * item.volume,
+      lastUpdate: new Date().toISOString()
+    };
+  });
 }
 
 // Scrape prices only (for quick updates)

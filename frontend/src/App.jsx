@@ -219,7 +219,7 @@ const DRDetailModal = ({ dr, onClose }) => {
             </div>
           </div>
 
-          <a href={`https://www.set.or.th/th/market/product/dr/${dr.symbol}/overview`} target="_blank" rel="noopener noreferrer" className="block w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-4 rounded-2xl text-center transition-all">ดูข้อมูลบน SET.or.th →</a>
+          <a href={`https://www.set.or.th/th/market/product/dr/quote/${dr.symbol}/price`} target="_blank" rel="noopener noreferrer" className="block w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-4 rounded-2xl text-center transition-all">ดูข้อมูลบน SET.or.th →</a>
         </div>
       </div>
     </div>
