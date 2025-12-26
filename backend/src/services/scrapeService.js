@@ -37,10 +37,10 @@ const COUNTRY_MAP = {
 function detectCountry(market, underlying, symbol) {
   if (!market) market = '';
   if (!underlying) underlying = '';
-  
+
   market = market.toUpperCase();
   underlying = underlying.toUpperCase();
-  
+
   if (market.includes('NASDAQ') || market.includes('NYSE') || market.includes('US')) return 'US';
   if (market.includes('HKEX') || market.includes('HK')) return 'HK';
   if (market.includes('SSE') || market.includes('SZSE') || market.includes('SHANGHAI') || market.includes('SHENZHEN')) return 'CN';
@@ -50,20 +50,20 @@ function detectCountry(market, underlying, symbol) {
   if (market.includes('EURONEXT') || market.includes('LSE') || market.includes('XETRA')) return 'EU';
   if (market.includes('TWSE') || market.includes('TPEx')) return 'TW';
   if (market.includes('KRX') || market.includes('KOSPI')) return 'KR';
-  
+
   // Check by underlying symbol patterns
   if (/^(AAPL|MSFT|GOOGL|META|AMZN|NVDA|TSLA|NFLX|AMD|INTC)/.test(underlying)) return 'US';
   if (/^(BABA|JD|PDD|BIDU|NIO)/.test(underlying)) return 'CN';
   if (/^(TENCENT|XIAOMI|MEITUAN|BYD)/.test(underlying)) return 'HK';
   if (/^(TOYOTA|SONY|NINTENDO|HONDA)/.test(underlying)) return 'JP';
-  
+
   return 'US'; // Default
 }
 
 // Detect sector from name/underlying
 function detectSector(name, underlying) {
   const nameUpper = (name + ' ' + underlying).toUpperCase();
-  
+
   if (/ETF|INDEX|FUND/.test(nameUpper)) return 'ETF';
   if (/BANK|FINANCE|INSURANCE|CREDIT/.test(nameUpper)) return 'Finance';
   if (/TECH|SOFTWARE|SEMICONDUCTOR|CHIP|COMPUTER|CLOUD|AI/.test(nameUpper)) return 'Technology';
@@ -75,14 +75,14 @@ function detectSector(name, underlying) {
   if (/OIL|GAS|ENERGY|POWER|SOLAR|WIND/.test(nameUpper)) return 'Energy';
   if (/REAL ESTATE|REIT|PROPERTY/.test(nameUpper)) return 'Real Estate';
   if (/TELECOM|COMMUNICATION|5G/.test(nameUpper)) return 'Telecom';
-  
+
   return 'Technology'; // Default for most DRs
 }
 
 // Get issuer code from issuer name
 function getIssuerCode(issuerName) {
   if (!issuerName) return null;
-  
+
   if (issuerName.includes('บัวหลวง')) return 'BLS';
   if (issuerName.includes('หยวนต้า')) return 'YUANTA';
   if (issuerName.includes('อินโนเวสท์')) return 'INVX';
@@ -92,14 +92,14 @@ function getIssuerCode(issuerName) {
   if (issuerName.includes('พาย') || issuerName.includes('Pi')) return 'PI';
   if (issuerName.includes('ฟินันเซีย')) return 'FSS';
   if (issuerName.includes('เกียรตินาคิน')) return 'KKP';
-  
+
   return null;
 }
 
 // Get company logo emoji based on name
 function getCompanyLogo(name, symbol) {
   const nameUpper = (name + ' ' + symbol).toUpperCase();
-  
+
   // US Tech Giants
   if (nameUpper.includes('APPLE') || symbol.includes('AAPL')) return '🍎';
   if (nameUpper.includes('MICROSOFT') || symbol.includes('MSFT')) return '🪟';
@@ -109,7 +109,7 @@ function getCompanyLogo(name, symbol) {
   if (nameUpper.includes('NVIDIA') || symbol.includes('NVDA')) return '🎮';
   if (nameUpper.includes('TESLA') || symbol.includes('TSLA')) return '🚗';
   if (nameUpper.includes('NETFLIX') || symbol.includes('NFLX')) return '🎬';
-  
+
   // Chinese Tech
   if (nameUpper.includes('ALIBABA') || symbol.includes('BABA')) return '🛍️';
   if (nameUpper.includes('TENCENT')) return '💬';
@@ -117,27 +117,27 @@ function getCompanyLogo(name, symbol) {
   if (nameUpper.includes('BYD')) return '🔋';
   if (nameUpper.includes('MEITUAN')) return '🍜';
   if (nameUpper.includes('JD')) return '🏪';
-  
+
   // Japanese
   if (nameUpper.includes('TOYOTA')) return '🚙';
   if (nameUpper.includes('SONY')) return '🎮';
   if (nameUpper.includes('NINTENDO')) return '🍄';
   if (nameUpper.includes('HONDA')) return '🏍️';
-  
+
   // European Luxury
   if (nameUpper.includes('LVMH')) return '👜';
   if (nameUpper.includes('HERMES')) return '🧣';
   if (nameUpper.includes('ASML')) return '🔬';
-  
+
   // Banks/Finance
   if (nameUpper.includes('BANK') || nameUpper.includes('DBS') || nameUpper.includes('UOB')) return '🏦';
-  
+
   // ETF
   if (nameUpper.includes('ETF') || nameUpper.includes('INDEX')) return '📈';
-  
+
   // Default by country
   if (symbol.includes('VN')) return '🇻🇳';
-  
+
   return '📊';
 }
 
@@ -152,19 +152,74 @@ function parseVolume(volumeStr) {
   if (!volumeStr) return 0;
   const str = volumeStr.toString().replace(/,/g, '');
   const num = parseFloat(str) || 0;
-  
+
   if (str.includes('M') || str.includes('m')) return num * 1000000;
   if (str.includes('K') || str.includes('k')) return num * 1000;
   if (str.includes('B') || str.includes('b')) return num * 1000000000;
-  
+
   return num;
 }
 
-// Scrape from ThaiWarrant.com (Real Data)
+// Scrape from SET Official API (Best Source)
+async function scrapeSET() {
+  try {
+    console.log('Fetching DR list from SET Official API...');
+
+    const response = await axios.get('https://www.set.or.th/api/set/dr/search?symbols=&tradeDateType=C&lang=th', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.set.or.th/th/market/product/dr/marketdata',
+        'Accept': 'application/json'
+      },
+      timeout: 30000
+    });
+
+    if (response.data && Array.isArray(response.data)) {
+      return response.data.map(item => ({
+        symbol: item.symbol,
+        name: item.securityName || item.symbol,
+        underlying: item.underlyingName || item.symbol.replace(/\d+$/, ''),
+        market: item.exchange || 'N/A',
+        country: 'N/A', // We can infer this or it might be in other fields
+        sector: 'N/A', // We can infer this
+        price: item.last || 0,
+        change: item.change || 0,
+        changePercent: item.percentChange || 0,
+        volume: item.volume || 0,
+        value: (item.value || 0) * 1000, // API returns value in thousands
+        high: item.high || 0,
+        low: item.low || 0,
+        open: item.open || 0,
+        prevClose: item.prior || 0,
+        issuer: 'Unknown', // Need to infer from symbol
+        issuerCode: getIssuerCodeFromSuffix(item.symbol),
+        ratio: 'N/A',
+        tradingHours: 'N/A',
+        pe: 0,
+        dividend: 0,
+        marketCap: (item.marketCap || 0) * 1000000,
+        logo: getCompanyLogo('', item.symbol),
+        lastUpdate: new Date().toISOString()
+      })).map(dr => ({
+        ...dr,
+        country: detectCountry(dr.market, dr.underlying, dr.symbol),
+        sector: detectSector(dr.name, dr.underlying),
+        issuer: getIssuerName(dr.issuerCode)
+      }));
+    }
+
+    return null;
+  } catch (error) {
+    console.error('SET API scrape error:', error.message);
+    return null;
+  }
+}
+
+// Scrape from ThaiWarrant.com (Fallback Source)
 async function scrapeThaiWarrant() {
   try {
     console.log('Scraping DR list from ThaiWarrant.com...');
-    
+
     const response = await axios.get('https://www.thaiwarrant.com/dr/search', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -175,10 +230,10 @@ async function scrapeThaiWarrant() {
 
     const $ = cheerio.load(response.data);
     const drList = [];
-    
+
     // Select the grid view table
     const table = $('#MainContent_gvDRSearch');
-    
+
     if (table.length === 0) {
       console.log('ThaiWarrant table not found');
       return null;
@@ -186,7 +241,6 @@ async function scrapeThaiWarrant() {
 
     // Iterate over rows (skipping header)
     table.find('tr').each((i, row) => {
-      // Skip header row usually, or check for specific class if needed
       if (i === 0) return;
 
       const cols = $(row).find('td');
@@ -197,46 +251,33 @@ async function scrapeThaiWarrant() {
       const changePercentStr = $(cols[2]).text().trim();
       const valueStr = $(cols[3]).text().trim();
       const ratio = $(cols[4]).text().trim();
-      // col 5 is business/sector
-      // col 6 is underlying
       const underlying = $(cols[6]).text().trim();
       const market = $(cols[7]).text().trim();
 
-      // Basic cleanup
       const price = parsePrice(priceStr);
       const changePercent = parseFloat(changePercentStr.replace(/[^\d.-]/g, '')) || 0;
-      const value = parseVolume(valueStr); // "Value" column
+      const value = parseVolume(valueStr);
 
-      // Try to determine issuer from symbol suffix (e.g. 13 = KGI)
-      // This is a rough mapping based on common codes
-      let issuer = 'Unknown';
-      if (symbol.endsWith('01')) issuer = 'InvX';
-      else if (symbol.endsWith('13')) issuer = 'KGI';
-      else if (symbol.endsWith('19')) issuer = 'Yuanta';
-      else if (symbol.endsWith('80')) issuer = 'BLS';
-      else if (symbol.endsWith('41')) issuer = 'JPM';
-      else if (symbol.endsWith('06')) issuer = 'KKP';
-      else if (symbol.endsWith('28')) issuer = 'MQ';
-      else if (symbol.endsWith('24')) issuer = 'FSS';
-      
+      const issuerCode = getIssuerCodeFromSuffix(symbol);
+
       drList.push({
         symbol,
-        name: `${symbol} (${underlying})`, // Construct a name since it's not in the table
+        name: `${symbol} (${underlying})`,
         underlying,
         market,
         country: detectCountry(market, underlying, symbol),
         sector: detectSector($(cols[5]).text().trim(), underlying),
         price,
-        change: 0, // Not explicitly in table, usually calculated or scraped if available
+        change: 0,
         changePercent,
-        volume: 0, // Table gives Value, not Volume. We can estimate Volume = Value / Price if needed
+        volume: 0,
         value,
-        high: 0, 
+        high: 0,
         low: 0,
         open: 0,
         prevClose: 0,
-        issuer,
-        issuerCode: getIssuerCodeFromSuffix(symbol),
+        issuer: getIssuerName(issuerCode),
+        issuerCode,
         ratio,
         tradingHours: 'N/A',
         pe: 0,
@@ -259,40 +300,59 @@ function getIssuerCodeFromSuffix(symbol) {
   if (symbol.endsWith('13')) return 'KGI';
   if (symbol.endsWith('19')) return 'YUANTA';
   if (symbol.endsWith('80')) return 'BLS';
+  if (symbol.endsWith('41')) return 'JPM';
   if (symbol.endsWith('06')) return 'KKP';
-  if (symbol.endsWith('24')) return 'FSS';
+  if (symbol.endsWith('28')) return 'MQ';
+  if (symbol.endsWith('24')) return 'FSS'; // Finansia
+  if (symbol.endsWith('08')) return 'ASPS'; // Asia Plus
+  if (symbol.endsWith('16')) return 'TNS'; // Thanachart
+  if (symbol.endsWith('29')) return 'PI'; // PI
   return 'OTHER';
+}
+
+function getIssuerName(code) {
+  const map = {
+    'INVX': 'บล.อินโนเวสท์ เอกซ์',
+    'KGI': 'บล.เคจีไอ',
+    'YUANTA': 'บล.หยวนต้า',
+    'BLS': 'บล.บัวหลวง',
+    'JPM': 'JPMorgan',
+    'KKP': 'บล.เกียรตินาคินภัทร',
+    'MQ': 'Macquarie',
+    'FSS': 'บล.ฟินันเซีย ไซรัส',
+    'ASPS': 'บล.เอเซีย พลัส',
+    'TNS': 'บล.ธนชาต',
+    'PI': 'บล.พาย'
+  };
+  return map[code] || 'Unknown';
 }
 
 // Load initial/fallback data
 async function loadInitialData() {
   console.log('Loading initial data...');
-  
-  // 1. Try ThaiWarrant (User requested source)
-  let scrapedData = await scrapeThaiWarrant();
-  
-  // 2. Fallback to SETTRADE if needed (unlikely to work without specific headers but kept as option)
+
+  // 1. Try Official SET API (Best Source)
+  let scrapedData = await scrapeSET();
+
+  // 2. Fallback to ThaiWarrant if SET fails
   if (!scrapedData || scrapedData.length === 0) {
-     scrapedData = await scrapeDRList();
+    scrapedData = await scrapeThaiWarrant();
   }
 
   if (scrapedData && scrapedData.length > 0) {
-    // If it came from scrapeThaiWarrant, it is already processed.
-    // If it came from scrapeDRList (settrade), it needs processing.
-    // We can detecting by checking a property.
     if (scrapedData[0].marketCap !== undefined && scrapedData[0].issuerCode === undefined) {
-        // It's raw settrade data
-        drData = scrapedData.map(processDRData);
+      // Raw settrade/legacy format (unlikely now)
+      drData = scrapedData.map(processDRData);
     } else {
-        // It's already processed ThaiWarrant data
-        drData = scrapedData;
+      // Already processed data
+      drData = scrapedData;
     }
-    
+
     lastUpdateTime = new Date().toISOString();
     console.log(`Loaded ${drData.length} DRs from live data`);
     return;
   }
-  
+
   // 3. Last Resort: Comprehensive fallback data
   console.log('Using fallback DR data...');
   drData = getFallbackDRData();
@@ -311,7 +371,7 @@ function processDRData(raw) {
   const underlying = raw.underlying || raw.underlyingSymbol || symbol.replace(/\d+$/, '');
   const market = raw.market || raw.exchange || '';
   const issuer = raw.issuer || raw.issuerName || '';
-  
+
   return {
     symbol,
     name,
@@ -357,7 +417,7 @@ function getFallbackDRData() {
     { symbol: 'AMD80', name: 'Advanced Micro Devices', underlying: 'AMD', market: 'NASDAQ', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 4.28, change: 0.15, changePercent: 3.63, volume: 980000, marketCap: 220, pe: 45.2, dividend: 0 },
     { symbol: 'AVGO80', name: 'Broadcom Inc.', underlying: 'AVGO', market: 'NASDAQ', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 7.65, change: 0.12, changePercent: 1.59, volume: 320000, marketCap: 1050, pe: 45.2, dividend: 2.12 },
     { symbol: 'COSTCO19', name: 'Costco Wholesale', underlying: 'COST', market: 'NASDAQ', issuer: 'บล.หยวนต้า', ratio: '1:1000', tradingHours: 'กลางวัน+กลางคืน', price: 31.85, change: 0.18, changePercent: 0.57, volume: 180000, marketCap: 410, pe: 52.3, dividend: 1.16 },
-    
+
     // China/Hong Kong Tech
     { symbol: 'BABA80', name: 'Alibaba Group', underlying: 'BABA', market: 'NYSE', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 2.92, change: 0.08, changePercent: 2.82, volume: 980000, marketCap: 210, pe: 18.5, dividend: 0 },
     { symbol: 'TENCENT80', name: 'Tencent Holdings', underlying: '0700.HK', market: 'HKEX', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน', price: 14.25, change: 0.32, changePercent: 2.30, volume: 650000, marketCap: 480, pe: 22.3, dividend: 0.35 },
@@ -369,33 +429,33 @@ function getFallbackDRData() {
     { symbol: 'NIO80', name: 'NIO Inc.', underlying: 'NIO', market: 'NYSE', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 0.15, change: 0.01, changePercent: 7.14, volume: 890000, marketCap: 8, pe: -5.2, dividend: 0 },
     { symbol: 'XPEV80', name: 'XPeng Inc.', underlying: 'XPEV', market: 'NYSE', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 0.52, change: 0.02, changePercent: 4.00, volume: 320000, marketCap: 12, pe: -8.5, dividend: 0 },
     { symbol: 'LI80', name: 'Li Auto Inc.', underlying: 'LI', market: 'NASDAQ', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 0.82, change: 0.03, changePercent: 3.80, volume: 280000, marketCap: 22, pe: 18.5, dividend: 0 },
-    
+
     // Japan
     { symbol: 'TOYOTA19', name: 'Toyota Motor', underlying: '7203.T', market: 'TSE', issuer: 'บล.หยวนต้า', ratio: '1:1000', tradingHours: 'กลางวัน', price: 6.32, change: 0.05, changePercent: 0.80, volume: 180000, marketCap: 280, pe: 9.8, dividend: 2.85 },
     { symbol: 'SONY19', name: 'Sony Group', underlying: '6758.T', market: 'TSE', issuer: 'บล.หยวนต้า', ratio: '1:1000', tradingHours: 'กลางวัน', price: 3.15, change: 0.08, changePercent: 2.61, volume: 145000, marketCap: 115, pe: 18.2, dividend: 0.85 },
     { symbol: 'NINTENDO19', name: 'Nintendo Co.', underlying: '7974.T', market: 'TSE', issuer: 'บล.หยวนต้า', ratio: '1:1000', tradingHours: 'กลางวัน', price: 2.68, change: 0.06, changePercent: 2.29, volume: 125000, marketCap: 85, pe: 22.5, dividend: 1.95 },
     { symbol: 'HONDA19', name: 'Honda Motor', underlying: '7267.T', market: 'TSE', issuer: 'บล.หยวนต้า', ratio: '1:1000', tradingHours: 'กลางวัน', price: 1.42, change: 0.02, changePercent: 1.43, volume: 98000, marketCap: 52, pe: 8.5, dividend: 3.25 },
-    
+
     // Europe
     { symbol: 'LVMH01', name: 'LVMH Moët Hennessy', underlying: 'MC.PA', market: 'Euronext Paris', issuer: 'บล.อินโนเวสท์ เอกซ์', ratio: '1:10', tradingHours: 'กลางวัน', price: 23.45, change: -0.28, changePercent: -1.18, volume: 85000, marketCap: 345, pe: 24.5, dividend: 1.35 },
     { symbol: 'HERMES80', name: 'Hermès International', underlying: 'RMS.PA', market: 'Euronext Paris', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน', price: 79.85, change: 0.92, changePercent: 1.17, volume: 42000, marketCap: 248, pe: 52.3, dividend: 0.65 },
     { symbol: 'ASML01', name: 'ASML Holding', underlying: 'ASML.AS', market: 'Euronext Amsterdam', issuer: 'บล.อินโนเวสท์ เอกซ์', ratio: '1:10', tradingHours: 'กลางวัน', price: 24.72, change: 0.45, changePercent: 1.85, volume: 68000, marketCap: 295, pe: 42.8, dividend: 0.85 },
-    
+
     // Singapore
     { symbol: 'DBS19', name: 'DBS Group Holdings', underlying: 'D05.SI', market: 'SGX', issuer: 'บล.หยวนต้า', ratio: '1:1000', tradingHours: 'กลางวัน', price: 1.28, change: 0.02, changePercent: 1.59, volume: 125000, marketCap: 98, pe: 11.2, dividend: 4.85 },
     { symbol: 'UOB19', name: 'United Overseas Bank', underlying: 'U11.SI', market: 'SGX', issuer: 'บล.หยวนต้า', ratio: '1:1000', tradingHours: 'กลางวัน', price: 1.12, change: 0.01, changePercent: 0.90, volume: 95000, marketCap: 55, pe: 10.5, dividend: 4.25 },
     { symbol: 'GRAB80', name: 'Grab Holdings', underlying: 'GRAB', market: 'NASDAQ', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 0.16, change: 0.01, changePercent: 6.67, volume: 450000, marketCap: 18, pe: -25.5, dividend: 0 },
-    
+
     // Vietnam ETF
     { symbol: 'E1VFVN3001', name: 'E1VFVN30 ETF', underlying: 'E1VFVN30', market: 'HOSE', issuer: 'บล.อินโนเวสท์ เอกซ์', ratio: '1:10', tradingHours: 'กลางวัน', price: 0.62, change: 0.01, changePercent: 1.64, volume: 85000, marketCap: 12, pe: 15.2, dividend: 1.85 },
     { symbol: 'FUEVFVND01', name: 'FUEVFVND ETF', underlying: 'FUEVFVND', market: 'HOSE', issuer: 'บล.อินโนเวสท์ เอกซ์', ratio: '1:10', tradingHours: 'กลางวัน', price: 0.58, change: 0.01, changePercent: 1.75, volume: 72000, marketCap: 8, pe: 14.8, dividend: 1.65 },
-    
+
     // Hong Kong ETFs
     { symbol: 'NDX01', name: 'ChinaAMC NASDAQ 100 ETF', underlying: '3086.HK', market: 'HKEX', issuer: 'บล.อินโนเวสท์ เอกซ์', ratio: '1:10', tradingHours: 'กลางวัน', price: 1.56, change: 0.02, changePercent: 1.30, volume: 320000, marketCap: 85, pe: 0, dividend: 0.45 },
     { symbol: 'CN01', name: 'ChinaAMC CSI 300 ETF', underlying: '3188.HK', market: 'HKEX', issuer: 'บล.อินโนเวสท์ เอกซ์', ratio: '1:10', tradingHours: 'กลางวัน', price: 1.28, change: 0.03, changePercent: 2.40, volume: 185000, marketCap: 52, pe: 0, dividend: 0.65 },
     { symbol: 'HK01', name: 'Tracker Fund of Hong Kong', underlying: '2800.HK', market: 'HKEX', issuer: 'บล.อินโนเวสท์ เอกซ์', ratio: '1:10', tradingHours: 'กลางวัน', price: 0.64, change: 0.01, changePercent: 1.59, volume: 145000, marketCap: 28, pe: 0, dividend: 2.35 },
     { symbol: 'HKTECH13', name: 'Hang Seng TECH Index ETF', underlying: '3032.HK', market: 'HKEX', issuer: 'บล.เคจีไอ', ratio: '1:100', tradingHours: 'กลางวัน', price: 1.42, change: 0.04, changePercent: 2.90, volume: 275000, marketCap: 62, pe: 0, dividend: 0.25 },
-    
+
     // More US Stocks
     { symbol: 'COIN80', name: 'Coinbase Global', underlying: 'COIN', market: 'NASDAQ', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 8.95, change: 0.45, changePercent: 5.29, volume: 420000, marketCap: 45, pe: 32.5, dividend: 0 },
     { symbol: 'PLTR80', name: 'Palantir Technologies', underlying: 'PLTR', market: 'NYSE', issuer: 'บล.บัวหลวง', ratio: '1:100', tradingHours: 'กลางวัน+กลางคืน', price: 2.85, change: 0.12, changePercent: 4.40, volume: 650000, marketCap: 85, pe: 180, dividend: 0 },
@@ -418,23 +478,30 @@ function getFallbackDRData() {
 
 // Scrape prices only (for quick updates)
 async function scrapePrices() {
-  // In production, this would fetch live prices
-  // For now, simulate minor price changes
-  drData = drData.map(dr => {
-    const changeMultiplier = (Math.random() - 0.5) * 0.02; // ±1%
-    const newPrice = dr.price * (1 + changeMultiplier);
-    const newChange = newPrice - (dr.price - dr.change);
-    const newChangePercent = (newChange / (newPrice - newChange)) * 100;
-    
-    return {
-      ...dr,
-      price: Math.round(newPrice * 100) / 100,
-      change: Math.round(newChange * 100) / 100,
-      changePercent: Math.round(newChangePercent * 100) / 100,
-      lastUpdate: new Date().toISOString()
-    };
-  });
-  
+  console.log('Updating prices from SET API...');
+  const liveData = await scrapeSET();
+  if (liveData && liveData.length > 0) {
+    // Update existing drData with new prices
+    drData = drData.map(dr => {
+      const live = liveData.find(l => l.symbol === dr.symbol);
+      if (live) {
+        return {
+          ...dr,
+          price: live.price,
+          change: live.change,
+          changePercent: live.changePercent,
+          volume: live.volume,
+          value: live.value,
+          high: live.high,
+          low: live.low,
+          open: live.open,
+          lastUpdate: live.lastUpdate
+        };
+      }
+      return dr;
+    });
+    console.log('Price update completed');
+  }
   lastUpdateTime = new Date().toISOString();
 }
 
