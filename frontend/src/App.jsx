@@ -5,6 +5,29 @@ import { drAPI, brokerAPI } from './services/api';
 // Country names mapping
 const countryNames = { US: 'สหรัฐฯ', CN: 'จีน', HK: 'ฮ่องกง', JP: 'ญี่ปุ่น', SG: 'สิงคโปร์', VN: 'เวียดนาม', EU: 'ยุโรป', TW: 'ไต้หวัน', KR: 'เกาหลีใต้' };
 
+// Helper to determine trading hours from DR data (fallback when backend data is missing)
+const getTradingHours = (dr) => {
+  // If tradingHours is already set and valid, use it
+  if (dr.tradingHours && dr.tradingHours !== 'N/A') return dr.tradingHours;
+
+  // Check by underlying stock or market
+  const underlying = (dr.underlying || '').toUpperCase();
+  const market = (dr.market || '').toUpperCase();
+  const country = dr.country;
+
+  // US stock patterns that have night trading
+  const usStockPatterns = /^(AAPL|MSFT|GOOGL|GOOG|META|AMZN|NVDA|TSLA|NFLX|AMD|INTC|COIN|PLTR|UBER|SHOP|SQ|PYPL|CRM|ORCL|ADBE|DIS|V|MA|JPM|BAC|WMT|PG|JNJ|UNH|HD|KO|PEP|MCD|NKE|SBUX|COST|TGT|CVS|WBA|XOM|CVX|COP|MRK|PFE|ABBV|LLY|TMO|ABT|BMY|GILD|QQQ|SPY)/;
+  const usMarkets = ['NASDAQ', 'NYSE', 'US'];
+  const euMarkets = ['EURONEXT', 'LSE', 'XETRA', 'PARIS', 'AMSTERDAM'];
+
+  const hasNightTrading = usMarkets.some(m => market.includes(m)) ||
+    euMarkets.some(m => market.includes(m)) ||
+    country === 'US' || country === 'EU' ||
+    usStockPatterns.test(underlying);
+
+  return hasNightTrading ? 'กลางวัน+กลางคืน' : 'กลางวันเท่านั้น';
+};
+
 // Loading Spinner
 const Spinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -265,7 +288,7 @@ const DRDetailModal = ({ dr, onClose }) => {
                     <p className="text-brutalist-muted text-sm">ช่วงเวลาซื้อขาย</p>
                     <TradingSessionIndicator tradingSession={dr.tradingSession} />
                   </div>
-                  <p className="font-display font-bold text-lg text-black">{dr.tradingHours || 'กลางวันเท่านั้น'}</p>
+                  <p className="font-display font-bold text-lg text-black">{getTradingHours(dr)}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-gray-100/50 rounded-xl p-3">
@@ -301,15 +324,21 @@ const DRDetailModal = ({ dr, onClose }) => {
                   href={`https://finance.yahoo.com/quote/${dr.underlying || dr.symbol?.replace(/\d+$/, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-center bg-gray-100 border-2 border-black py-2 text-sm font-bold hover:bg-gray-200 transition-colors"
+                  className="block w-full text-center bg-primary-500 border-2 border-black py-2 text-sm font-bold text-black hover:bg-primary-600 transition-colors"
                 >
                   ดูข้อมูลบน Yahoo Finance →
                 </a>
+                <button
+                  className="block w-full text-center bg-white border-2 border-black py-2 text-sm font-bold text-brutalist-muted hover:bg-gray-100 transition-colors cursor-not-allowed"
+                  disabled
+                >
+                  📖 อ่านเกี่ยวกับหุ้นตัวนี้ (เร็วๆนี้)
+                </button>
               </div>
             </div>
           </div>
 
-          <a href={`https://www.set.or.th/th/market/product/dr/quote/${dr.symbol}/price`} target="_blank" rel="noopener noreferrer" className="block w-full bg-primary-500 hover:bg-primary-600 text-black font-bold py-4 rounded-2xl text-center transition-all">ดูข้อมูลบน SET.or.th →</a>
+          <a href={`https://www.set.or.th/th/market/product/dr/quote/${dr.symbol}/price`} target="_blank" rel="noopener noreferrer" className="block w-full bg-primary-500 border-3 border-black shadow-brutal text-black font-bold py-4 text-center transition-all hover:shadow-brutal-lg">ดูข้อมูลบน SET.or.th →</a>
         </div>
       </div>
     </div>
@@ -497,22 +526,22 @@ const ComparePage = ({ compareList, setCompareList, drList }) => {
   const handleAdd = (symbol) => { if (selectedSymbols.length >= 4 || selectedSymbols.includes(symbol)) return; setSelectedSymbols([...selectedSymbols, symbol]); };
   const handleRemove = (symbol) => setSelectedSymbols(selectedSymbols.filter(s => s !== symbol));
   const compareFields = [
-    { key: 'price', label: 'ราคา', format: (v) => `฿${v?.toLocaleString()}` },
-    { key: 'changePercent', label: '% เปลี่ยนแปลง', format: (v) => `${v > 0 ? '+' : ''}${v?.toFixed(2)}%`, highlight: true },
-    { key: 'volume', label: 'Volume', format: (v) => (v || 0).toLocaleString() },
-    { key: 'underlying', label: 'หลักทรัพย์อ้างอิง', format: (v) => v || '-' },
-    { key: 'ratio', label: 'อัตราแปลง', format: (v) => v || '-' },
-    { key: 'tradingHours', label: 'เวลาซื้อขาย', format: (v) => v || 'กลางวัน' },
-    { key: 'sector', label: 'Sector', format: (v) => v },
-    { key: 'country', label: 'ประเทศ', format: (v) => countryNames[v] || v },
-    { key: 'issuer', label: 'ผู้ออก', format: (v) => v }
+    { key: 'price', label: 'ราคา', format: (v, dr) => `฿${v?.toLocaleString()}` },
+    { key: 'changePercent', label: '% เปลี่ยนแปลง', format: (v, dr) => `${v > 0 ? '+' : ''}${v?.toFixed(2)}%`, highlight: true },
+    { key: 'volume', label: 'Volume', format: (v, dr) => (v || 0).toLocaleString() },
+    { key: 'underlying', label: 'หลักทรัพย์อ้างอิง', format: (v, dr) => v || '-' },
+    { key: 'ratio', label: 'อัตราแปลง', format: (v, dr) => v || '100:1' },
+    { key: 'tradingHours', label: 'เวลาซื้อขาย', format: (v, dr) => getTradingHours(dr) },
+    { key: 'sector', label: 'Sector', format: (v, dr) => v || '-' },
+    { key: 'country', label: 'ประเทศ', format: (v, dr) => countryNames[v] || v },
+    { key: 'issuer', label: 'ผู้ออก', format: (v, dr) => v || '-' }
   ];
 
   return (
     <div className="animate-fade-in-up">
       <div className="mb-6"><h1 className="font-display font-bold text-2xl text-black mb-2">เปรียบเทียบ DR</h1><p className="text-brutalist-muted">เลือก DR สูงสุด 4 ตัวเพื่อเปรียบเทียบ</p></div>
       <div className="bg-white border-3 border-black shadow-brutal p-4 mb-6"><div className="flex flex-wrap items-center gap-3"><select onChange={(e) => { if (e.target.value) { handleAdd(e.target.value); e.target.value = ''; } }} className="bg-gray-100 border border-black rounded-xl px-4 py-3 min-w-[250px]"><option value="">+ เพิ่ม DR เพื่อเปรียบเทียบ</option>{drList.filter(d => !selectedSymbols.includes(d.symbol)).map(dr => (<option key={dr.symbol} value={dr.symbol}>{dr.logo} {dr.symbol} - {dr.name}</option>))}</select>{selectedSymbols.map(symbol => { const dr = drList.find(d => d.symbol === symbol); return (<span key={symbol} className="bg-primary-500/20 text-primary-400 px-4 py-2 rounded-xl flex items-center space-x-2"><span>{dr?.logo} {symbol}</span><button onClick={() => handleRemove(symbol)} className="hover:text-black">✕</button></span>); })}</div></div>
-      {selectedData.length > 0 ? (<div className="bg-white border-3 border-black shadow-brutal overflow-hidden"><div className="overflow-x-auto"><table className="w-full"><thead><tr className="bg-gray-100/50"><th className="text-left p-4 font-semibold text-brutalist-muted min-w-[150px]">รายการ</th>{selectedData.map(dr => (<th key={dr.symbol} className="text-center p-4 min-w-[180px]"><div className="flex flex-col items-center"><span className="text-3xl mb-2">{dr.logo}</span><span className="font-display font-bold text-black">{dr.symbol}</span></div></th>))}</tr></thead><tbody>{compareFields.map((field, index) => (<tr key={field.key} className={index % 2 === 0 ? 'bg-gray-100/30' : ''}><td className="p-4 text-brutalist-muted font-medium">{field.label}</td>{selectedData.map(dr => { const value = dr[field.key]; const formatted = field.format(value); let textClass = 'text-black'; if (field.highlight && field.key === 'changePercent') textClass = value > 0 ? 'text-primary-400' : value < 0 ? 'text-red-400' : 'text-brutalist-muted'; return (<td key={dr.symbol} className={`p-4 text-center font-medium ${textClass}`}>{formatted}</td>); })}</tr>))}</tbody></table></div></div>) : (<div className="bg-white border-3 border-black shadow-brutal p-12 text-center"><p className="text-brutalist-muted text-lg mb-4">เลือก DR เพื่อเริ่มเปรียบเทียบ</p></div>)}
+      {selectedData.length > 0 ? (<div className="bg-white border-3 border-black shadow-brutal overflow-hidden"><div className="overflow-x-auto"><table className="w-full"><thead><tr className="bg-gray-100/50"><th className="text-left p-4 font-semibold text-brutalist-muted min-w-[150px]">รายการ</th>{selectedData.map(dr => (<th key={dr.symbol} className="text-center p-4 min-w-[180px]"><div className="flex flex-col items-center"><span className="text-3xl mb-2">{dr.logo}</span><span className="font-display font-bold text-black">{dr.symbol}</span></div></th>))}</tr></thead><tbody>{compareFields.map((field, index) => (<tr key={field.key} className={index % 2 === 0 ? 'bg-gray-100/30' : ''}><td className="p-4 text-brutalist-muted font-medium">{field.label}</td>{selectedData.map(dr => { const value = dr[field.key]; const formatted = field.format(value, dr); let textClass = 'text-black'; if (field.highlight && field.key === 'changePercent') textClass = value > 0 ? 'text-primary-400' : value < 0 ? 'text-red-400' : 'text-brutalist-muted'; return (<td key={dr.symbol} className={`p-4 text-center font-medium ${textClass}`}>{formatted}</td>); })}</tr>))}</tbody></table></div></div>) : (<div className="bg-white border-3 border-black shadow-brutal p-12 text-center"><p className="text-brutalist-muted text-lg mb-4">เลือก DR เพื่อเริ่มเปรียบเทียบ</p></div>)}
     </div>
   );
 };
