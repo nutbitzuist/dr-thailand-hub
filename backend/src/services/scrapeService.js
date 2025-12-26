@@ -160,63 +160,140 @@ function parseVolume(volumeStr) {
   return num;
 }
 
-// Scrape DR list from SETTRADE
-async function scrapeDRList() {
+// Scrape from ThaiWarrant.com (Real Data)
+async function scrapeThaiWarrant() {
   try {
-    console.log('Scraping DR list from SETTRADE...');
+    console.log('Scraping DR list from ThaiWarrant.com...');
     
-    // SETTRADE DR market data page
-    const response = await axios.get('https://www.settrade.com/api/set/dr/list', {
+    const response = await axios.get('https://www.thaiwarrant.com/dr/search', {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json',
-        'Referer': 'https://www.settrade.com/th/equities/dr/market-data'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
       },
       timeout: 30000
     });
 
-    if (response.data && Array.isArray(response.data)) {
-      return response.data;
-    }
+    const $ = cheerio.load(response.data);
+    const drList = [];
     
-    return null;
+    // Select the grid view table
+    const table = $('#MainContent_gvDRSearch');
+    
+    if (table.length === 0) {
+      console.log('ThaiWarrant table not found');
+      return null;
+    }
+
+    // Iterate over rows (skipping header)
+    table.find('tr').each((i, row) => {
+      // Skip header row usually, or check for specific class if needed
+      if (i === 0) return;
+
+      const cols = $(row).find('td');
+      if (cols.length < 8) return;
+
+      const symbol = $(cols[0]).text().trim();
+      const priceStr = $(cols[1]).text().trim();
+      const changePercentStr = $(cols[2]).text().trim();
+      const valueStr = $(cols[3]).text().trim();
+      const ratio = $(cols[4]).text().trim();
+      // col 5 is business/sector
+      // col 6 is underlying
+      const underlying = $(cols[6]).text().trim();
+      const market = $(cols[7]).text().trim();
+
+      // Basic cleanup
+      const price = parsePrice(priceStr);
+      const changePercent = parseFloat(changePercentStr.replace(/[^\d.-]/g, '')) || 0;
+      const value = parseVolume(valueStr); // "Value" column
+
+      // Try to determine issuer from symbol suffix (e.g. 13 = KGI)
+      // This is a rough mapping based on common codes
+      let issuer = 'Unknown';
+      if (symbol.endsWith('01')) issuer = 'InvX';
+      else if (symbol.endsWith('13')) issuer = 'KGI';
+      else if (symbol.endsWith('19')) issuer = 'Yuanta';
+      else if (symbol.endsWith('80')) issuer = 'BLS';
+      else if (symbol.endsWith('41')) issuer = 'JPM';
+      else if (symbol.endsWith('06')) issuer = 'KKP';
+      else if (symbol.endsWith('28')) issuer = 'MQ';
+      else if (symbol.endsWith('24')) issuer = 'FSS';
+      
+      drList.push({
+        symbol,
+        name: `${symbol} (${underlying})`, // Construct a name since it's not in the table
+        underlying,
+        market,
+        country: detectCountry(market, underlying, symbol),
+        sector: detectSector($(cols[5]).text().trim(), underlying),
+        price,
+        change: 0, // Not explicitly in table, usually calculated or scraped if available
+        changePercent,
+        volume: 0, // Table gives Value, not Volume. We can estimate Volume = Value / Price if needed
+        value,
+        high: 0, 
+        low: 0,
+        open: 0,
+        prevClose: 0,
+        issuer,
+        issuerCode: getIssuerCodeFromSuffix(symbol),
+        ratio,
+        tradingHours: 'N/A',
+        pe: 0,
+        dividend: 0,
+        marketCap: 0,
+        logo: getCompanyLogo('', symbol),
+        lastUpdate: new Date().toISOString()
+      });
+    });
+
+    return drList;
   } catch (error) {
-    console.log('SETTRADE API not accessible, trying alternative...');
+    console.error('ThaiWarrant scrape error:', error.message);
     return null;
   }
 }
 
-// Scrape from SET website
-async function scrapeFromSET() {
-  try {
-    console.log('Scraping from SET website...');
-    
-    // This would require Puppeteer for JavaScript-rendered content
-    // For now, return null and use fallback data
-    return null;
-  } catch (error) {
-    console.error('SET scrape error:', error.message);
-    return null;
-  }
+function getIssuerCodeFromSuffix(symbol) {
+  if (symbol.endsWith('01')) return 'INVX';
+  if (symbol.endsWith('13')) return 'KGI';
+  if (symbol.endsWith('19')) return 'YUANTA';
+  if (symbol.endsWith('80')) return 'BLS';
+  if (symbol.endsWith('06')) return 'KKP';
+  if (symbol.endsWith('24')) return 'FSS';
+  return 'OTHER';
 }
 
 // Load initial/fallback data
 async function loadInitialData() {
-  // Try to scrape real data first
-  let scrapedData = await scrapeDRList();
+  console.log('Loading initial data...');
   
-  if (!scrapedData) {
-    scrapedData = await scrapeFromSET();
+  // 1. Try ThaiWarrant (User requested source)
+  let scrapedData = await scrapeThaiWarrant();
+  
+  // 2. Fallback to SETTRADE if needed (unlikely to work without specific headers but kept as option)
+  if (!scrapedData || scrapedData.length === 0) {
+     scrapedData = await scrapeDRList();
   }
-  
+
   if (scrapedData && scrapedData.length > 0) {
-    drData = scrapedData.map(processDRData);
+    // If it came from scrapeThaiWarrant, it is already processed.
+    // If it came from scrapeDRList (settrade), it needs processing.
+    // We can detecting by checking a property.
+    if (scrapedData[0].marketCap !== undefined && scrapedData[0].issuerCode === undefined) {
+        // It's raw settrade data
+        drData = scrapedData.map(processDRData);
+    } else {
+        // It's already processed ThaiWarrant data
+        drData = scrapedData;
+    }
+    
     lastUpdateTime = new Date().toISOString();
     console.log(`Loaded ${drData.length} DRs from live data`);
     return;
   }
   
-  // Use comprehensive fallback data based on actual SET DR listings
+  // 3. Last Resort: Comprehensive fallback data
   console.log('Using fallback DR data...');
   drData = getFallbackDRData();
   brokerData = BROKERS.map(broker => ({
@@ -227,7 +304,7 @@ async function loadInitialData() {
   console.log(`Loaded ${drData.length} DRs from fallback data`);
 }
 
-// Process raw DR data
+// Process raw DR data (Legacy/Settrade)
 function processDRData(raw) {
   const symbol = raw.symbol || raw.Symbol || '';
   const name = raw.name || raw.Name || raw.companyName || '';
