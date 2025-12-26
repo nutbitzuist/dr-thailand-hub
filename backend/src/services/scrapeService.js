@@ -573,6 +573,27 @@ async function updateMarketExtraData() {
   } finally {
     if (browser) await browser.close();
   }
+
+  // FALLBACK: Calculate from drData if SET scraping failed
+  if (!marketOverview && drData.length > 0) {
+    console.log('Calculating Market Overview from DR data (Fallback)...');
+    marketOverview = {
+      gainer: drData.filter(d => d.changePercent > 0).length,
+      loser: drData.filter(d => d.changePercent < 0).length,
+      unchanged: drData.filter(d => d.changePercent === 0).length,
+      totalValue: drData.reduce((sum, d) => sum + (d.value || 0), 0),
+      totalVolume: drData.reduce((sum, d) => sum + (d.volume || 0), 0)
+    };
+  }
+
+  if ((!rankings || rankings.topGainers.length === 0) && drData.length > 0) {
+    console.log('Calculating Rankings from DR data (Fallback)...');
+    rankings = {
+      topGainers: [...drData].sort((a, b) => b.changePercent - a.changePercent).slice(0, 10),
+      topLosers: [...drData].sort((a, b) => a.changePercent - b.changePercent).slice(0, 10),
+      mostActiveValue: [...drData].sort((a, b) => b.value - a.value).slice(0, 10)
+    };
+  }
 }
 
 // Get News for a specific DR
