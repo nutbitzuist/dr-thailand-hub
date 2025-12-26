@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://dr-thailand-hub-backend-production.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/((?!api|assets|favicon|.*\\..*).*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [

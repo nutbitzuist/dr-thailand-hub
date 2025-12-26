@@ -13,17 +13,16 @@ let rankings = {
 };
 let lastUpdateTime = null;
 
-// Broker information (static data)
+// Broker information (static data) - Corrected with actual SET issuer codes
 const BROKERS = [
+  { id: 'KTB', name: 'ธ.กรุงไทย', fullName: 'ธนาคารกรุงไทย จำกัด (มหาชน)', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.krungthai.com', logo: '🔵' },
   { id: 'BLS', name: 'บล.บัวหลวง', fullName: 'บริษัทหลักทรัพย์ บัวหลวง จำกัด (มหาชน)', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.bualuang.co.th', logo: '🏦' },
   { id: 'YUANTA', name: 'บล.หยวนต้า', fullName: 'บริษัทหลักทรัพย์ หยวนต้า (ประเทศไทย) จำกัด', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.yuanta.co.th', logo: '🔶' },
-  { id: 'INVX', name: 'บล.อินโนเวสท์ เอกซ์', fullName: 'บริษัทหลักทรัพย์ อินโนเวสท์ เอกซ์ จำกัด', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.innovestx.co.th', logo: '🔷' },
   { id: 'KGI', name: 'บล.เคจีไอ', fullName: 'บริษัทหลักทรัพย์ เคจีไอ (ประเทศไทย) จำกัด (มหาชน)', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.kgieworld.co.th', logo: '🟢' },
-  { id: 'KBANK', name: 'บล.กสิกรไทย', fullName: 'บริษัทหลักทรัพย์ กสิกรไทย จำกัด (มหาชน)', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.kasikornsecurities.com', logo: '💚' },
-  { id: 'KTB', name: 'ธ.กรุงไทย', fullName: 'ธนาคารกรุงไทย จำกัด (มหาชน)', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.krungthai.com', logo: '🔵' },
-  { id: 'PI', name: 'บล.พาย', fullName: 'บริษัทหลักทรัพย์ พาย จำกัด (มหาชน)', commission: '0.12%', minTrade: '1 หน่วย', website: 'https://www.pi.co.th', logo: '🟣' },
+  { id: 'KKP', name: 'บล.เกียรตินาคินภัทร', fullName: 'บริษัทหลักทรัพย์ เกียรตินาคินภัทร จำกัด (มหาชน)', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.kkpfg.com', logo: '🟡' },
   { id: 'FSS', name: 'บล.ฟินันเซีย ไซรัส', fullName: 'บริษัทหลักทรัพย์ ฟินันเซีย ไซรัส จำกัด (มหาชน)', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.fnsyrus.com', logo: '🟠' },
-  { id: 'KKP', name: 'บล.เกียรตินาคินภัทร', fullName: 'บริษัทหลักทรัพย์ เกียรตินาคินภัทร จำกัด (มหาชน)', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.kkpfg.com', logo: '🟡' }
+  { id: 'PI', name: 'บล.พาย', fullName: 'บริษัทหลักทรัพย์ พาย จำกัด (มหาชน)', commission: '0.12%', minTrade: '1 หน่วย', website: 'https://www.pi.co.th', logo: '🟣' },
+  { id: 'INVX', name: 'บล.อินโนเวสท์ เอกซ์', fullName: 'บริษัทหลักทรัพย์ อินโนเวสท์ เอกซ์ จำกัด', commission: '0.15%', minTrade: '1 หน่วย', website: 'https://www.innovestx.co.th', logo: '🔷' }
 ];
 
 // Country mapping
@@ -302,27 +301,29 @@ async function scrapeThaiWarrant() {
   }
 }
 
+// Corrected issuer code suffix mappings based on SET official data
 function getIssuerCodeFromSuffix(symbol) {
-  if (symbol.endsWith('01')) return 'INVX';
-  if (symbol.endsWith('13')) return 'KGI';
-  if (symbol.endsWith('19')) return 'YUANTA';
-  if (symbol.endsWith('80')) return 'BLS';
-  if (symbol.endsWith('41')) return 'JPM';
-  if (symbol.endsWith('06')) return 'KKP';
-  if (symbol.endsWith('28')) return 'MQ';
-  if (symbol.endsWith('24')) return 'FSS'; // Finansia
-  if (symbol.endsWith('08')) return 'ASPS'; // Asia Plus
-  if (symbol.endsWith('16')) return 'TNS'; // Thanachart
-  if (symbol.endsWith('29')) return 'PI'; // PI
+  if (symbol.endsWith('80')) return 'KTB';     // Krung Thai Bank
+  if (symbol.endsWith('01')) return 'BLS';     // Bualuang Securities
+  if (symbol.endsWith('13')) return 'KGI';     // KGI Securities
+  if (symbol.endsWith('19')) return 'YUANTA';  // Yuanta Securities
+  if (symbol.endsWith('06')) return 'KKP';     // Kiatnakin Phatra
+  if (symbol.endsWith('24')) return 'FSS';     // Finansia Syrus
+  if (symbol.endsWith('29')) return 'PI';      // PI Securities
+  if (symbol.endsWith('41')) return 'JPM';     // JPMorgan
+  if (symbol.endsWith('28')) return 'MQ';      // Macquarie
+  if (symbol.endsWith('08')) return 'ASPS';    // Asia Plus
+  if (symbol.endsWith('16')) return 'TNS';     // Thanachart
   return 'OTHER';
 }
 
 function getIssuerName(code) {
   const map = {
+    'KTB': 'ธ.กรุงไทย',
+    'BLS': 'บล.บัวหลวง',
     'INVX': 'บล.อินโนเวสท์ เอกซ์',
     'KGI': 'บล.เคจีไอ',
     'YUANTA': 'บล.หยวนต้า',
-    'BLS': 'บล.บัวหลวง',
     'JPM': 'JPMorgan',
     'KKP': 'บล.เกียรตินาคินภัทร',
     'MQ': 'Macquarie',

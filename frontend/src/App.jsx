@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Routes, Route, NavLink, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { drAPI, brokerAPI } from './services/api';
 
 // Country names mapping
@@ -12,26 +13,49 @@ const Spinner = () => (
 );
 
 // Navigation Component
-const Navigation = ({ currentPage, setCurrentPage }) => (
-  <nav className="fixed top-0 left-0 right-0 z-50 glass">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between h-16">
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-xl font-bold animate-pulse-glow text-white">DR</div>
-          <div><h1 className="font-display font-bold text-lg text-white">DR Thailand Hub</h1><p className="text-xs text-dark-400">ศูนย์ข้อมูล DR ครบวงจร</p></div>
+const Navigation = () => {
+  const location = useLocation();
+  const navItems = [
+    { to: '/', label: 'หน้าหลัก', icon: '🏠' },
+    { to: '/catalog', label: 'รายการ DR', icon: '📋' },
+    { to: '/compare', label: 'เปรียบเทียบ', icon: '⚖️' },
+    { to: '/screener', label: 'DR Screener', icon: '🔍' },
+    { to: '/brokers', label: 'โบรกเกอร์', icon: '🏢' }
+  ];
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 glass">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <NavLink to="/" className="flex items-center space-x-3 cursor-pointer">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-xl font-bold animate-pulse-glow text-white">DR</div>
+            <div><h1 className="font-display font-bold text-lg text-white">DR Thailand Hub</h1><p className="text-xs text-dark-400">ศูนย์ข้อมูล DR ครบวงจร</p></div>
+          </NavLink>
+          <div className="hidden md:flex items-center space-x-1">
+            {navItems.map(item => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${isActive ? 'bg-primary-500/20 text-primary-400 tab-active' : 'text-dark-300 hover:text-white hover:bg-dark-800'}`}
+              >
+                <span className="mr-2">{item.icon}</span>{item.label}
+              </NavLink>
+            ))}
+          </div>
+          <select
+            value={location.pathname}
+            onChange={(e) => window.location.href = e.target.value}
+            className="md:hidden bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white"
+          >
+            {navItems.map(item => (
+              <option key={item.to} value={item.to}>{item.icon} {item.label}</option>
+            ))}
+          </select>
         </div>
-        <div className="hidden md:flex items-center space-x-1">
-          {[{ id: 'home', label: 'หน้าหลัก', icon: '🏠' }, { id: 'catalog', label: 'รายการ DR', icon: '📋' }, { id: 'compare', label: 'เปรียบเทียบ', icon: '⚖️' }, { id: 'screener', label: 'DR Screener', icon: '🔍' }, { id: 'brokers', label: 'โบรกเกอร์', icon: '🏢' }].map(item => (
-            <button key={item.id} onClick={() => setCurrentPage(item.id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${currentPage === item.id ? 'bg-primary-500/20 text-primary-400 tab-active' : 'text-dark-300 hover:text-white hover:bg-dark-800'}`}><span className="mr-2">{item.icon}</span>{item.label}</button>
-          ))}
-        </div>
-        <select value={currentPage} onChange={(e) => setCurrentPage(e.target.value)} className="md:hidden bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white">
-          {[{ id: 'home', label: '🏠 หน้าหลัก' }, { id: 'catalog', label: '📋 รายการ DR' }, { id: 'compare', label: '⚖️ เปรียบเทียบ' }, { id: 'screener', label: '🔍 Screener' }, { id: 'brokers', label: '🏢 โบรกเกอร์' }].map(item => (<option key={item.id} value={item.id}>{item.label}</option>))}
-        </select>
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
+};
 
 // Market Pulse Component
 const MarketPulse = ({ overview }) => {
@@ -45,7 +69,7 @@ const MarketPulse = ({ overview }) => {
     <div className="glass rounded-2xl p-6 dr-card mb-8">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-display font-bold text-white flex items-center">
-          <span className="mr-2">⚡</span> Market Pulse
+          <span className="mr-2">⚡</span>Market Pulse
         </h3>
         <span className="text-xs text-dark-400">อัปเดตแบบ Realtime</span>
       </div>
@@ -150,7 +174,7 @@ const NewsSection = ({ symbol }) => {
   );
 };
 
-// Simple Price Chart Component (Placeholder for now, could use a real library later)
+// Simple Price Chart Component
 const MiniChart = () => (
   <div className="h-40 w-full bg-dark-800/30 rounded-2xl border border-dark-800 flex items-center justify-center relative overflow-hidden">
     <div className="absolute inset-0 opacity-20">
@@ -203,7 +227,8 @@ const DRDetailModal = ({ dr, onClose }) => {
 };
 
 // Home Page
-const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOverview, rankings, brokers, setCatalogFilters }) => {
+const HomePage = ({ setSelectedDR, drList, loading, marketOverview, rankings, brokers }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('gainers');
   const topGainers = useMemo(() => rankings?.topGainers?.length > 0 ? rankings.topGainers : [...drList].sort((a, b) => b.changePercent - a.changePercent).slice(0, 5), [drList, rankings]);
   const topVolume = useMemo(() => rankings?.mostActiveValue?.length > 0 ? rankings.mostActiveValue : [...drList].sort((a, b) => b.value - a.value).slice(0, 5), [drList, rankings]);
@@ -217,8 +242,7 @@ const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOvervi
   }), [drList, brokers]);
 
   const handleCountryClick = (code) => {
-    setCatalogFilters({ country: code, search: '', sector: 'All', sort: 'symbol' });
-    setCurrentPage('catalog');
+    navigate(`/catalog?country=${code}`);
   };
 
   if (loading) return <Spinner />;
@@ -230,8 +254,8 @@ const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOvervi
           <h1 className="font-display font-bold text-4xl lg:text-5xl text-white mb-4">ลงทุนหุ้นโลก<br /><span className="text-primary-400">ง่ายๆ ผ่าน DR</span></h1>
           <p className="text-dark-300 text-lg max-w-xl mb-6">ศูนย์รวมข้อมูล DR ครบวงจร ค้นหา เปรียบเทียบ และติดตาม DR ทั้งหมดในตลาดหลักทรัพย์ไทย</p>
           <div className="flex flex-wrap gap-3">
-            <button onClick={() => setCurrentPage('catalog')} className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-all hover:scale-105">สำรวจ DR ทั้งหมด →</button>
-            <button onClick={() => setCurrentPage('screener')} className="px-6 py-3 bg-dark-800 hover:bg-dark-700 text-white font-semibold rounded-xl border border-dark-600">🔍 DR Screener</button>
+            <button onClick={() => navigate('/catalog')} className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-all hover:scale-105">สำรวจ DR ทั้งหมด →</button>
+            <button onClick={() => navigate('/screener')} className="px-6 py-3 bg-dark-800 hover:bg-dark-700 text-white font-semibold rounded-xl border border-dark-600">🔍 DR Screener</button>
           </div>
         </div>
         <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary-500/10 to-transparent pointer-events-none"></div>
@@ -305,7 +329,7 @@ const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOvervi
                 );
               })}
             </div>
-            <button onClick={() => setCurrentPage('catalog')} className="w-full mt-4 text-center text-dark-400 text-xs hover:text-primary-400 transition-colors">ดูทั้งหมด →</button>
+            <button onClick={() => navigate('/catalog')} className="w-full mt-4 text-center text-dark-400 text-xs hover:text-primary-400 transition-colors">ดูทั้งหมด →</button>
           </div>
         </div>
       </div>
@@ -314,16 +338,20 @@ const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOvervi
 };
 
 // Catalog Page
-const CatalogPage = ({ setSelectedDR, compareList, setCompareList, drList, loading, initialFilters, setInitialFilters }) => {
-  const [filters, setFilters] = useState(initialFilters || { search: '', country: 'All', sector: 'All', sort: 'symbol' });
+const CatalogPage = ({ setSelectedDR, compareList, setCompareList, drList, loading }) => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialCountry = searchParams.get('country') || 'All';
+
+  const [filters, setFilters] = useState({ search: '', country: initialCountry, sector: 'All', sort: 'symbol' });
   const [showCompareMode, setShowCompareMode] = useState(false);
 
   useEffect(() => {
-    if (initialFilters) {
-      setFilters(initialFilters);
-      setInitialFilters(null); // Reset after applying
+    const country = searchParams.get('country');
+    if (country) {
+      setFilters(prev => ({ ...prev, country }));
     }
-  }, [initialFilters, setInitialFilters]);
+  }, [location.search]);
 
   const sectors = useMemo(() => ['All', ...new Set(drList.map(d => d.sector))], [drList]);
   const countries = useMemo(() => ['All', ...new Set(drList.map(d => d.country))], [drList]);
@@ -443,10 +471,8 @@ const Footer = ({ lastUpdate }) => (<footer className="glass mt-12 py-8"><div cl
 
 // Main App
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
   const [selectedDR, setSelectedDR] = useState(null);
   const [compareList, setCompareList] = useState([]);
-  const [catalogFilters, setCatalogFilters] = useState(null);
   const [drList, setDRList] = useState([]);
   const [brokers, setBrokers] = useState([]);
   const [marketOverview, setMarketOverview] = useState(null);
@@ -485,21 +511,18 @@ export default function App() {
     fetchData();
   }, []);
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home': return <HomePage setCurrentPage={setCurrentPage} setSelectedDR={setSelectedDR} drList={drList} loading={loading} marketOverview={marketOverview} rankings={rankings} brokers={brokers} setCatalogFilters={setCatalogFilters} />;
-      case 'catalog': return <CatalogPage setSelectedDR={setSelectedDR} compareList={compareList} setCompareList={setCompareList} drList={drList} loading={loading} initialFilters={catalogFilters} setInitialFilters={setCatalogFilters} />;
-      case 'compare': return <ComparePage compareList={compareList} setCompareList={setCompareList} drList={drList} />;
-      case 'screener': return <ScreenerPage setSelectedDR={setSelectedDR} drList={drList} brokers={brokers} />;
-      case 'brokers': return <BrokersPage drList={drList} brokers={brokers} loading={loading} />;
-      default: return <HomePage setCurrentPage={setCurrentPage} setSelectedDR={setSelectedDR} drList={drList} loading={loading} marketOverview={marketOverview} rankings={rankings} brokers={brokers} setCatalogFilters={setCatalogFilters} />;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-dark-950">
-      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      <main className="pt-24 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">{renderPage()}</main>
+      <Navigation />
+      <main className="pt-24 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <Routes>
+          <Route path="/" element={<HomePage setSelectedDR={setSelectedDR} drList={drList} loading={loading} marketOverview={marketOverview} rankings={rankings} brokers={brokers} />} />
+          <Route path="/catalog" element={<CatalogPage setSelectedDR={setSelectedDR} compareList={compareList} setCompareList={setCompareList} drList={drList} loading={loading} />} />
+          <Route path="/compare" element={<ComparePage compareList={compareList} setCompareList={setCompareList} drList={drList} />} />
+          <Route path="/screener" element={<ScreenerPage setSelectedDR={setSelectedDR} drList={drList} brokers={brokers} />} />
+          <Route path="/brokers" element={<BrokersPage drList={drList} brokers={brokers} loading={loading} />} />
+        </Routes>
+      </main>
       <Footer lastUpdate={lastUpdate} />
       {selectedDR && <DRDetailModal dr={selectedDR} onClose={() => setSelectedDR(null)} />}
     </div>
