@@ -203,13 +203,23 @@ const DRDetailModal = ({ dr, onClose }) => {
 };
 
 // Home Page
-const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOverview, rankings }) => {
+const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOverview, rankings, brokers, setCatalogFilters }) => {
   const [activeTab, setActiveTab] = useState('gainers');
   const topGainers = useMemo(() => rankings?.topGainers?.length > 0 ? rankings.topGainers : [...drList].sort((a, b) => b.changePercent - a.changePercent).slice(0, 5), [drList, rankings]);
-  const topVolume = useMemo(() => rankings?.mostActiveValue?.length > 0 ? rankings.mostActiveValue : [...drList].sort((a, b) => b.volume - a.volume).slice(0, 5), [drList, rankings]);
+  const topVolume = useMemo(() => rankings?.mostActiveValue?.length > 0 ? rankings.mostActiveValue : [...drList].sort((a, b) => b.value - a.value).slice(0, 5), [drList, rankings]);
   const topLosers = useMemo(() => rankings?.topLosers?.length > 0 ? rankings.topLosers : [...drList].sort((a, b) => a.changePercent - b.changePercent).slice(0, 5), [drList, rankings]);
 
-  const stats = useMemo(() => ({ totalDR: drList.length, countries: [...new Set(drList.map(d => d.country))].length, totalVolume: drList.reduce((sum, d) => sum + (d.volume || 0), 0) }), [drList]);
+  const stats = useMemo(() => ({
+    totalDR: drList.length,
+    brokers: brokers.length || 9,
+    countries: [...new Set(drList.map(d => d.country))].length,
+    totalVolume: drList.reduce((sum, d) => sum + (d.volume || 0), 0)
+  }), [drList, brokers]);
+
+  const handleCountryClick = (code) => {
+    setCatalogFilters({ country: code, search: '', sector: 'All', sort: 'symbol' });
+    setCurrentPage('catalog');
+  };
 
   if (loading) return <Spinner />;
 
@@ -237,7 +247,7 @@ const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOvervi
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard icon="📊" label="จำนวน DR ทั้งหมด" value={stats.totalDR} subValue="ในตลาดหลักทรัพย์ไทย" />
-        <StatsCard icon="🏢" label="โบรกเกอร์ผู้ออก" value={9} subValue="บริษัท" />
+        <StatsCard icon="🏢" label="โบรกเกอร์ผู้ออก" value={stats.brokers} subValue="บริษัท" />
         <StatsCard icon="🌍" label="ประเทศที่ครอบคลุม" value={stats.countries} subValue="ตลาดทั่วโลก" />
         <StatsCard icon="📈" label="Volume รวม" value={(stats.totalVolume / 1000000).toFixed(1) + 'M'} subValue="หุ้น/วัน" trend={2.5} />
       </div>
@@ -288,7 +298,7 @@ const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOvervi
                 const count = drList.filter(d => d.country === code).length;
                 if (count === 0) return null;
                 return (
-                  <button key={code} onClick={() => setCurrentPage('catalog')} className={`badge-${code.toLowerCase()} rounded-xl p-3 text-center hover:opacity-80 transition-opacity`}>
+                  <button key={code} onClick={() => handleCountryClick(code)} className={`badge-${code.toLowerCase()} rounded-xl p-3 text-center hover:opacity-80 transition-opacity`}>
                     <p className="text-white font-bold text-lg">{count}</p>
                     <p className="text-white/80 text-[10px]">{name}</p>
                   </button>
@@ -304,9 +314,16 @@ const HomePage = ({ setCurrentPage, setSelectedDR, drList, loading, marketOvervi
 };
 
 // Catalog Page
-const CatalogPage = ({ setSelectedDR, compareList, setCompareList, drList, loading }) => {
-  const [filters, setFilters] = useState({ search: '', country: 'All', sector: 'All', sort: 'symbol' });
+const CatalogPage = ({ setSelectedDR, compareList, setCompareList, drList, loading, initialFilters, setInitialFilters }) => {
+  const [filters, setFilters] = useState(initialFilters || { search: '', country: 'All', sector: 'All', sort: 'symbol' });
   const [showCompareMode, setShowCompareMode] = useState(false);
+
+  useEffect(() => {
+    if (initialFilters) {
+      setFilters(initialFilters);
+      setInitialFilters(null); // Reset after applying
+    }
+  }, [initialFilters, setInitialFilters]);
 
   const sectors = useMemo(() => ['All', ...new Set(drList.map(d => d.sector))], [drList]);
   const countries = useMemo(() => ['All', ...new Set(drList.map(d => d.country))], [drList]);
@@ -353,11 +370,25 @@ const ComparePage = ({ compareList, setCompareList, drList }) => {
 };
 
 // Screener Page
-const ScreenerPage = ({ setSelectedDR, drList }) => {
-  const [criteria, setCriteria] = useState({ minMarketCap: '', maxMarketCap: '', minPE: '', maxPE: '', minDividend: '', hasDividend: false, nightTrading: false, country: 'All', sector: 'All' });
+const ScreenerPage = ({ setSelectedDR, drList, brokers }) => {
+  const [criteria, setCriteria] = useState({ minMarketCap: '', maxMarketCap: '', minPE: '', maxPE: '', minDividend: '', hasDividend: false, nightTrading: false, country: 'All', sector: 'All', broker: 'All' });
   const sectors = useMemo(() => ['All', ...new Set(drList.map(d => d.sector))], [drList]);
-  const filteredDRs = useMemo(() => drList.filter(dr => { if (criteria.minMarketCap && (dr.marketCap || 0) < parseFloat(criteria.minMarketCap)) return false; if (criteria.maxMarketCap && (dr.marketCap || 0) > parseFloat(criteria.maxMarketCap)) return false; if (criteria.minPE && (dr.pe || 0) < parseFloat(criteria.minPE)) return false; if (criteria.maxPE && (dr.pe || 0) > parseFloat(criteria.maxPE)) return false; if (criteria.minDividend && (dr.dividend || 0) < parseFloat(criteria.minDividend)) return false; if (criteria.hasDividend && (dr.dividend || 0) <= 0) return false; if (criteria.nightTrading && !dr.tradingHours?.includes('กลางคืน')) return false; if (criteria.country !== 'All' && dr.country !== criteria.country) return false; if (criteria.sector !== 'All' && dr.sector !== criteria.sector) return false; return true; }), [criteria, drList]);
-  const resetCriteria = () => setCriteria({ minMarketCap: '', maxMarketCap: '', minPE: '', maxPE: '', minDividend: '', hasDividend: false, nightTrading: false, country: 'All', sector: 'All' });
+
+  const filteredDRs = useMemo(() => drList.filter(dr => {
+    if (criteria.minMarketCap && (dr.marketCap || 0) < parseFloat(criteria.minMarketCap)) return false;
+    if (criteria.maxMarketCap && (dr.marketCap || 0) > parseFloat(criteria.maxMarketCap)) return false;
+    if (criteria.minPE && (dr.pe || 0) < parseFloat(criteria.minPE)) return false;
+    if (criteria.maxPE && (dr.pe || 0) > parseFloat(criteria.maxPE)) return false;
+    if (criteria.minDividend && (dr.dividend || 0) < parseFloat(criteria.minDividend)) return false;
+    if (criteria.hasDividend && (dr.dividend || 0) <= 0) return false;
+    if (criteria.nightTrading && !dr.tradingHours?.includes('กลางคืน')) return false;
+    if (criteria.country !== 'All' && dr.country !== criteria.country) return false;
+    if (criteria.sector !== 'All' && dr.sector !== criteria.sector) return false;
+    if (criteria.broker !== 'All' && dr.issuerCode !== criteria.broker) return false;
+    return true;
+  }), [criteria, drList]);
+
+  const resetCriteria = () => setCriteria({ minMarketCap: '', maxMarketCap: '', minPE: '', maxPE: '', minDividend: '', hasDividend: false, nightTrading: false, country: 'All', sector: 'All', broker: 'All' });
 
   return (
     <div className="animate-fade-in-up">
@@ -366,10 +397,11 @@ const ScreenerPage = ({ setSelectedDR, drList }) => {
         <div className="glass rounded-2xl p-6 lg:col-span-1 h-fit">
           <div className="flex items-center justify-between mb-4"><h2 className="font-semibold text-white">เงื่อนไข</h2><button onClick={resetCriteria} className="text-dark-400 hover:text-white text-sm">รีเซ็ต</button></div>
           <div className="space-y-4">
-            <div><label className="block text-dark-400 text-sm mb-2">ประเทศ</label><select value={criteria.country} onChange={(e) => setCriteria(prev => ({ ...prev, country: e.target.value }))} className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2"><option value="All">ทั้งหมด</option>{Object.entries(countryNames).map(([code, name]) => (<option key={code} value={code}>{name}</option>))}</select></div>
-            <div><label className="block text-dark-400 text-sm mb-2">Sector</label><select value={criteria.sector} onChange={(e) => setCriteria(prev => ({ ...prev, sector: e.target.value }))} className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2"><option value="All">ทั้งหมด</option>{sectors.filter(s => s !== 'All').map(sector => (<option key={sector} value={sector}>{sector}</option>))}</select></div>
-            <div><label className="block text-dark-400 text-sm mb-2">Market Cap ($B)</label><div className="flex space-x-2"><input type="number" placeholder="Min" value={criteria.minMarketCap} onChange={(e) => setCriteria(prev => ({ ...prev, minMarketCap: e.target.value }))} className="w-1/2 bg-dark-800 border border-dark-700 rounded-xl px-3 py-2" /><input type="number" placeholder="Max" value={criteria.maxMarketCap} onChange={(e) => setCriteria(prev => ({ ...prev, maxMarketCap: e.target.value }))} className="w-1/2 bg-dark-800 border border-dark-700 rounded-xl px-3 py-2" /></div></div>
-            <div><label className="block text-dark-400 text-sm mb-2">Dividend Yield ขั้นต่ำ (%)</label><input type="number" placeholder="เช่น 2" value={criteria.minDividend} onChange={(e) => setCriteria(prev => ({ ...prev, minDividend: e.target.value }))} className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2" /></div>
+            <div><label className="block text-dark-400 text-sm mb-2">ประเทศ</label><select value={criteria.country} onChange={(e) => setCriteria(prev => ({ ...prev, country: e.target.value }))} className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white"><option value="All">ทั้งหมด</option>{Object.entries(countryNames).map(([code, name]) => (<option key={code} value={code}>{name}</option>))}</select></div>
+            <div><label className="block text-dark-400 text-sm mb-2">Sector</label><select value={criteria.sector} onChange={(e) => setCriteria(prev => ({ ...prev, sector: e.target.value }))} className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white"><option value="All">ทั้งหมด</option>{sectors.filter(s => s !== 'All').map(sector => (<option key={sector} value={sector}>{sector}</option>))}</select></div>
+            <div><label className="block text-dark-400 text-sm mb-2">โบรกเกอร์ผู้ออก</label><select value={criteria.broker} onChange={(e) => setCriteria(prev => ({ ...prev, broker: e.target.value }))} className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white"><option value="All">ทั้งหมด</option>{brokers.map(broker => (<option key={broker.id} value={broker.id}>{broker.logo} {broker.name}</option>))}</select></div>
+            <div><label className="block text-dark-400 text-sm mb-2">Market Cap ($B)</label><div className="flex space-x-2"><input type="number" placeholder="Min" value={criteria.minMarketCap} onChange={(e) => setCriteria(prev => ({ ...prev, minMarketCap: e.target.value }))} className="w-1/2 bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white" /><input type="number" placeholder="Max" value={criteria.maxMarketCap} onChange={(e) => setCriteria(prev => ({ ...prev, maxMarketCap: e.target.value }))} className="w-1/2 bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white" /></div></div>
+            <div><label className="block text-dark-400 text-sm mb-2">Dividend Yield ขั้นต่ำ (%)</label><input type="number" placeholder="เช่น 2" value={criteria.minDividend} onChange={(e) => setCriteria(prev => ({ ...prev, minDividend: e.target.value }))} className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white" /></div>
             <div className="space-y-3 pt-2"><label className="flex items-center space-x-3 cursor-pointer"><input type="checkbox" checked={criteria.hasDividend} onChange={(e) => setCriteria(prev => ({ ...prev, hasDividend: e.target.checked }))} className="w-5 h-5 rounded bg-dark-800" /><span className="text-dark-300">มีปันผลเท่านั้น</span></label><label className="flex items-center space-x-3 cursor-pointer"><input type="checkbox" checked={criteria.nightTrading} onChange={(e) => setCriteria(prev => ({ ...prev, nightTrading: e.target.checked }))} className="w-5 h-5 rounded bg-dark-800" /><span className="text-dark-300">ซื้อขายกลางคืนได้</span></label></div>
           </div>
           <div className="mt-6 p-4 bg-primary-500/10 rounded-xl"><p className="text-primary-400 font-semibold text-lg">{filteredDRs.length}</p><p className="text-dark-400 text-sm">DR ที่ตรงเงื่อนไข</p></div>
@@ -414,6 +446,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedDR, setSelectedDR] = useState(null);
   const [compareList, setCompareList] = useState([]);
+  const [catalogFilters, setCatalogFilters] = useState(null);
   const [drList, setDRList] = useState([]);
   const [brokers, setBrokers] = useState([]);
   const [marketOverview, setMarketOverview] = useState(null);
@@ -454,12 +487,12 @@ export default function App() {
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'home': return <HomePage setCurrentPage={setCurrentPage} setSelectedDR={setSelectedDR} drList={drList} loading={loading} marketOverview={marketOverview} rankings={rankings} />;
-      case 'catalog': return <CatalogPage setSelectedDR={setSelectedDR} compareList={compareList} setCompareList={setCompareList} drList={drList} loading={loading} />;
+      case 'home': return <HomePage setCurrentPage={setCurrentPage} setSelectedDR={setSelectedDR} drList={drList} loading={loading} marketOverview={marketOverview} rankings={rankings} brokers={brokers} setCatalogFilters={setCatalogFilters} />;
+      case 'catalog': return <CatalogPage setSelectedDR={setSelectedDR} compareList={compareList} setCompareList={setCompareList} drList={drList} loading={loading} initialFilters={catalogFilters} setInitialFilters={setCatalogFilters} />;
       case 'compare': return <ComparePage compareList={compareList} setCompareList={setCompareList} drList={drList} />;
-      case 'screener': return <ScreenerPage setSelectedDR={setSelectedDR} drList={drList} />;
+      case 'screener': return <ScreenerPage setSelectedDR={setSelectedDR} drList={drList} brokers={brokers} />;
       case 'brokers': return <BrokersPage drList={drList} brokers={brokers} loading={loading} />;
-      default: return <HomePage setCurrentPage={setCurrentPage} setSelectedDR={setSelectedDR} drList={drList} loading={loading} marketOverview={marketOverview} rankings={rankings} />;
+      default: return <HomePage setCurrentPage={setCurrentPage} setSelectedDR={setSelectedDR} drList={drList} loading={loading} marketOverview={marketOverview} rankings={rankings} brokers={brokers} setCatalogFilters={setCatalogFilters} />;
     }
   };
 

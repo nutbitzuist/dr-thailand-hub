@@ -263,6 +263,7 @@ async function scrapeThaiWarrant() {
       const price = parsePrice(priceStr);
       const changePercent = parseFloat(changePercentStr.replace(/[^\d.-]/g, '')) || 0;
       const value = parseVolume(valueStr);
+      const volume = price > 0 ? Math.round(value / price) : 0;
 
       const issuerCode = getIssuerCodeFromSuffix(symbol);
 
@@ -276,7 +277,7 @@ async function scrapeThaiWarrant() {
         price,
         change: 0,
         changePercent,
-        volume: 0,
+        volume,
         value,
         high: 0,
         low: 0,
