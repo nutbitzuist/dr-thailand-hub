@@ -2,9 +2,15 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const { format } = require('date-fns');
 
-// In-memory data store (can be replaced with database)
+// In-memory data store
 let drData = [];
 let brokerData = [];
+let marketOverview = null;
+let rankings = {
+  topGainers: [],
+  topLosers: [],
+  mostActiveValue: []
+};
 let lastUpdateTime = null;
 
 // Broker information (static data)
@@ -508,6 +514,55 @@ async function scrapePrices() {
 // Full scrape (DR list + prices)
 async function scrapeAll() {
   await loadInitialData();
+  await updateMarketExtraData();
+}
+
+// Update extra market data (overview, rankings)
+async function updateMarketExtraData() {
+  try {
+    console.log('Updating extra market data (overview, rankings)...');
+
+    // 1. Market Overview
+    const overviewRes = await axios.get('https://www.set.or.th/api/set/dr/market-overview', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.set.or.th/th/market/product/dr/overview'
+      }
+    });
+    if (overviewRes.data) {
+      marketOverview = overviewRes.data;
+    }
+
+    // 2. Rankings
+    const [gainers, losers, active] = await Promise.all([
+      axios.get('https://www.set.or.th/api/set/ranking/topGainer/SET/X?count=10', { headers: { 'User-Agent': 'Mozilla/5.0' } }).catch(() => ({ data: [] })),
+      axios.get('https://www.set.or.th/api/set/ranking/topLoser/SET/X?count=10', { headers: { 'User-Agent': 'Mozilla/5.0' } }).catch(() => ({ data: [] })),
+      axios.get('https://www.set.or.th/api/set/ranking/mostActiveValue/SET/X?count=10', { headers: { 'User-Agent': 'Mozilla/5.0' } }).catch(() => ({ data: [] }))
+    ]);
+
+    rankings = {
+      topGainers: gainers.data || [],
+      topLosers: losers.data || [],
+      mostActiveValue: active.data || []
+    };
+
+    console.log('Extra market data update completed');
+  } catch (error) {
+    console.error('Error updating extra market data:', error.message);
+  }
+}
+
+// Get News for a specific DR
+async function getDRNews(symbol) {
+  try {
+    const res = await axios.get(`https://www.set.or.th/api/set/news/${symbol}/list?lang=th&limit=10`, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
+    });
+    return res.data || [];
+  } catch (error) {
+    console.error(`Error fetching news for ${symbol}:`, error.message);
+    return [];
+  }
 }
 
 // Export functions
@@ -522,5 +577,8 @@ module.exports = {
     drCount: drData.filter(dr => dr.issuerCode === broker.id).length
   })),
   getBrokerById: (id) => BROKERS.find(b => b.id === id),
+  getMarketOverview: () => marketOverview,
+  getRankings: () => rankings,
+  getDRNews,
   getLastUpdateTime: () => lastUpdateTime
 };

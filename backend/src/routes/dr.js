@@ -62,7 +62,7 @@ router.get('/search', (req, res) => {
     }
 
     const searchTerm = q.toLowerCase();
-    const drList = scrapeService.getAllDRs().filter(dr => 
+    const drList = scrapeService.getAllDRs().filter(dr =>
       dr.symbol.toLowerCase().includes(searchTerm) ||
       dr.name.toLowerCase().includes(searchTerm) ||
       dr.underlying.toLowerCase().includes(searchTerm)
@@ -249,7 +249,7 @@ router.get('/countries', (req, res) => {
   try {
     const drList = scrapeService.getAllDRs();
     const countries = [...new Set(drList.map(dr => dr.country))].sort();
-    
+
     const countryData = countries.map(code => ({
       code,
       name: getCountryName(code),
@@ -270,7 +270,7 @@ router.get('/sectors', (req, res) => {
   try {
     const drList = scrapeService.getAllDRs();
     const sectors = [...new Set(drList.map(dr => dr.sector))].sort();
-    
+
     const sectorData = sectors.map(name => ({
       name,
       count: drList.filter(dr => dr.sector === name).length
@@ -295,7 +295,7 @@ router.get('/compare', (req, res) => {
 
     const symbolList = symbols.split(',').map(s => s.trim().toUpperCase());
     const drList = scrapeService.getAllDRs();
-    const compareData = symbolList.map(symbol => 
+    const compareData = symbolList.map(symbol =>
       drList.find(dr => dr.symbol === symbol)
     ).filter(Boolean);
 
@@ -309,6 +309,53 @@ router.get('/compare', (req, res) => {
   }
 });
 
+// Get market overview
+router.get('/market-overview', (req, res) => {
+  try {
+    const overview = scrapeService.getMarketOverview();
+    if (!overview) {
+      return res.status(404).json({ success: false, error: 'Market overview data not available' });
+    }
+    res.json({
+      success: true,
+      lastUpdate: scrapeService.getLastUpdateTime(),
+      data: overview
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get rankings
+router.get('/rankings', (req, res) => {
+  try {
+    const rankings = scrapeService.getRankings();
+    res.json({
+      success: true,
+      lastUpdate: scrapeService.getLastUpdateTime(),
+      data: rankings
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get news for a specific DR
+router.get('/:symbol/news', async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const news = await scrapeService.getDRNews(symbol.toUpperCase());
+    res.json({
+      success: true,
+      symbol: symbol.toUpperCase(),
+      count: news.length,
+      data: news
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Get single DR by symbol
 router.get('/:symbol', (req, res) => {
   try {
@@ -316,9 +363,9 @@ router.get('/:symbol', (req, res) => {
     const dr = scrapeService.getDRBySymbol(symbol.toUpperCase());
 
     if (!dr) {
-      return res.status(404).json({ 
-        success: false, 
-        error: `DR with symbol "${symbol}" not found` 
+      return res.status(404).json({
+        success: false,
+        error: `DR with symbol "${symbol}" not found`
       });
     }
 

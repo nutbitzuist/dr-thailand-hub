@@ -28,8 +28,8 @@ app.use(cors({
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
@@ -52,6 +52,9 @@ app.get('/api', (req, res) => {
       '/api/dr/top/losers': 'Get top losers',
       '/api/dr/top/volume': 'Get top volume',
       '/api/dr/filter': 'Filter DRs with criteria',
+      '/api/dr/market-overview': 'Get market sentiment summary',
+      '/api/dr/rankings': 'Get market rankings (Gainers/Most Active)',
+      '/api/dr/:symbol/news': 'Get latest news for a DR',
       '/api/brokers': 'Get all brokers',
       '/api/brokers/:id': 'Get broker by ID'
     },
@@ -62,7 +65,7 @@ app.get('/api', (req, res) => {
 // Error handling
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
@@ -77,7 +80,7 @@ app.use((req, res) => {
 if (process.env.ENABLE_AUTO_SCRAPE === 'true') {
   // Thai market hours: 10:00-12:30, 14:30-16:30 (UTC+7)
   // Night session: 19:00-03:00 (next day)
-  
+
   // Scrape during day session (Mon-Fri, 10:00-16:30 Thai time)
   cron.schedule('*/5 10-16 * * 1-5', async () => {
     console.log('Running scheduled scrape (day session)...');
@@ -124,7 +127,7 @@ if (process.env.ENABLE_AUTO_SCRAPE === 'true') {
 (async () => {
   try {
     console.log('Loading initial data...');
-    await scrapeService.loadInitialData();
+    await scrapeService.scrapeAll();
     console.log('Initial data loaded');
   } catch (error) {
     console.error('Failed to load initial data:', error);
