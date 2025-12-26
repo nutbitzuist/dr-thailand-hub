@@ -74,28 +74,28 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b-4 border-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <NavLink to="/" className="flex items-center space-x-3 cursor-pointer">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-xl font-bold animate-pulse-glow text-white">DR</div>
-            <div><h1 className="font-display font-bold text-lg text-white">DR Thailand Hub</h1><p className="text-xs text-dark-400">ศูนย์ข้อมูล DR ครบวงจร</p></div>
+            <div className="w-10 h-10 bg-primary-500 border-3 border-black shadow-brutal-sm flex items-center justify-center text-xl font-black text-black">DR</div>
+            <div><h1 className="font-display font-black text-lg text-black">DR Thailand Hub</h1><p className="text-xs text-brutalist-muted font-medium">ศูนย์ข้อมูล DR ครบวงจร</p></div>
           </NavLink>
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-2">
             {navItems.map(item => (
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={({ isActive }) => `px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${isActive ? 'bg-primary-500/20 text-primary-400 tab-active' : 'text-dark-300 hover:text-white hover:bg-dark-800'}`}
+                className={({ isActive }) => `px-4 py-2 text-sm font-bold transition-all border-2 border-black ${isActive ? 'bg-primary-500 text-black shadow-brutal-sm' : 'bg-white text-black hover:bg-gray-100'}`}
               >
-                <span className="mr-2">{item.icon}</span>{item.label}
+                <span className="mr-1">{item.icon}</span>{item.label}
               </NavLink>
             ))}
           </div>
           <select
             value={location.pathname}
             onChange={(e) => window.location.href = e.target.value}
-            className="md:hidden bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white"
+            className="md:hidden bg-white border-2 border-black px-3 py-2 text-sm text-black font-bold"
           >
             {navItems.map(item => (
               <option key={item.to} value={item.to}>{item.icon} {item.label}</option>
@@ -116,44 +116,44 @@ const MarketPulse = ({ overview }) => {
   const loserPct = (loser / total) * 100;
 
   return (
-    <div className="glass rounded-2xl p-6 dr-card mb-8">
+    <div className="bg-white border-3 border-black shadow-brutal p-6 mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-display font-bold text-white flex items-center">
+        <h3 className="font-display font-black text-black flex items-center">
           <span className="mr-2">⚡</span>Market Pulse
         </h3>
-        <span className="text-xs text-dark-400">อัปเดตแบบ Realtime</span>
+        <span className="text-xs text-brutalist-muted font-medium border-2 border-black px-2 py-1 bg-gray-100">อัปเดตแบบ Realtime</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
-          <div className="flex justify-between text-xs mb-1">
-            <span className="text-primary-400">Gainers (+{gainer})</span>
-            <span className="text-red-400">Losers (-{loser})</span>
+          <div className="flex justify-between text-xs mb-1 font-bold">
+            <span className="text-green-600">Gainers (+{gainer})</span>
+            <span className="text-red-600">Losers (-{loser})</span>
           </div>
-          <div className="h-2 w-full bg-dark-800 rounded-full overflow-hidden flex">
-            <div className="h-full bg-primary-500" style={{ width: `${gainerPct}%` }}></div>
-            <div className="h-full bg-dark-600" style={{ width: `${100 - gainerPct - loserPct}%` }}></div>
+          <div className="h-4 w-full border-2 border-black overflow-hidden flex bg-white">
+            <div className="h-full bg-green-500" style={{ width: `${gainerPct}%` }}></div>
+            <div className="h-full bg-gray-300" style={{ width: `${100 - gainerPct - loserPct}%` }}></div>
             <div className="h-full bg-red-500" style={{ width: `${loserPct}%` }}></div>
           </div>
-          <p className="text-[10px] text-dark-500 text-center">อ้างอิงรายตลาด DR ทั้งหมด</p>
+          <p className="text-xs text-brutalist-muted text-center">อ้างอิงรายตลาด DR ทั้งหมด</p>
         </div>
         <div className="flex items-center justify-center space-x-6">
           <div className="text-center">
-            <p className="text-dark-400 text-[10px] uppercase tracking-wider mb-1">Market Value</p>
-            <p className="text-white font-bold">฿{(totalValue / 1000000).toFixed(1)}M</p>
+            <p className="text-brutalist-muted text-[10px] uppercase tracking-wider mb-1 font-bold">Market Value</p>
+            <p className="text-black font-black text-xl">฿{(totalValue / 1000000).toFixed(1)}M</p>
           </div>
-          <div className="w-px h-8 bg-dark-700"></div>
+          <div className="w-1 h-12 bg-black"></div>
           <div className="text-center">
-            <p className="text-dark-400 text-[10px] uppercase tracking-wider mb-1">Volume</p>
-            <p className="text-white font-bold">{(totalVolume / 1000).toFixed(0)}K</p>
+            <p className="text-brutalist-muted text-[10px] uppercase tracking-wider mb-1 font-bold">Volume</p>
+            <p className="text-black font-black text-xl">{(totalVolume / 1000).toFixed(0)}K</p>
           </div>
         </div>
         <div className="flex items-center justify-end">
           <div className="text-right">
             <div className="flex items-center justify-end space-x-2 text-xs">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-dark-300 font-medium">ตลาดเปิดซื้อขาย</span>
+              <span className="w-3 h-3 bg-green-500 border-2 border-black animate-pulse"></span>
+              <span className="text-black font-bold">ตลาดเปิดซื้อขาย</span>
             </div>
-            <p className="text-[10px] text-dark-500 mt-1">เวลาไทย {new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.</p>
+            <p className="text-xs text-brutalist-muted mt-1">เวลาไทย {new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.</p>
           </div>
         </div>
       </div>
@@ -163,9 +163,9 @@ const MarketPulse = ({ overview }) => {
 
 // Stats Card
 const StatsCard = ({ icon, label, value, subValue, trend }) => (
-  <div className="glass rounded-2xl p-6 dr-card">
-    <div className="flex items-start justify-between"><div className="text-3xl mb-3">{icon}</div>{trend !== undefined && <span className={`text-xs px-2 py-1 rounded-full ${trend > 0 ? 'bg-primary-500/20 text-primary-400' : 'bg-red-500/20 text-red-400'}`}>{trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%</span>}</div>
-    <p className="text-dark-400 text-sm mb-1">{label}</p><p className="font-display font-bold text-2xl text-white">{value}</p>{subValue && <p className="text-dark-500 text-xs mt-1">{subValue}</p>}
+  <div className="bg-white border-3 border-black shadow-brutal p-6 dr-card">
+    <div className="flex items-start justify-between"><div className="text-3xl mb-3">{icon}</div>{trend !== undefined && <span className={`text-xs px-2 py-1 border-2 border-black font-bold ${trend > 0 ? 'bg-green-400' : 'bg-red-400'}`}>{trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%</span>}</div>
+    <p className="text-brutalist-muted text-sm mb-1 font-medium">{label}</p><p className="font-display font-black text-2xl text-black">{value}</p>{subValue && <p className="text-brutalist-muted text-xs mt-1">{subValue}</p>}
   </div>
 );
 
@@ -173,14 +173,13 @@ const StatsCard = ({ icon, label, value, subValue, trend }) => (
 const DRCard = ({ dr, onClick, isSelected, onCompareToggle, showCompare }) => {
   const priceClass = dr.changePercent > 0 ? 'price-up' : dr.changePercent < 0 ? 'price-down' : 'price-neutral';
   return (
-    <div className="glass rounded-2xl p-5 dr-card cursor-pointer relative overflow-hidden group" onClick={() => onClick(dr)}>
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-      {showCompare && <div className="absolute top-3 right-3 z-10" onClick={(e) => { e.stopPropagation(); onCompareToggle && onCompareToggle(dr.symbol); }}><div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary-500 border-primary-500' : 'border-dark-600 hover:border-primary-500'}`}>{isSelected && <span className="text-white text-xs">✓</span>}</div></div>}
+    <div className="bg-white border-3 border-black shadow-brutal p-5 dr-card cursor-pointer relative group" onClick={() => onClick(dr)}>
+      {showCompare && <div className="absolute top-3 right-3 z-10" onClick={(e) => { e.stopPropagation(); onCompareToggle && onCompareToggle(dr.symbol); }}><div className={`w-6 h-6 border-2 border-black flex items-center justify-center transition-all ${isSelected ? 'bg-primary-500' : 'bg-white hover:bg-gray-100'}`}>{isSelected && <span className="text-black text-xs font-bold">✓</span>}</div></div>}
       <div className="relative">
-        <div className="flex items-start justify-between mb-3"><div className="flex items-center space-x-3"><span className="text-3xl">{dr.logo}</span><div><h3 className="font-display font-semibold text-white">{dr.symbol}</h3><p className="text-dark-400 text-xs truncate max-w-[150px]">{dr.name}</p></div></div><span className={`badge-${(dr.country || 'us').toLowerCase()} text-white text-xs px-2 py-1 rounded-full font-medium`}>{dr.country}</span></div>
-        <div className="mb-3"><p className="font-display font-bold text-xl text-white">฿{dr.price?.toLocaleString()}</p><p className={`text-sm font-medium ${priceClass}`}>{dr.change > 0 ? '+' : ''}{dr.change?.toFixed(2)} ({dr.changePercent > 0 ? '+' : ''}{dr.changePercent?.toFixed(2)}%)</p></div>
-        <div className="grid grid-cols-2 gap-2 text-xs"><div className="bg-dark-800/50 rounded-lg p-2"><p className="text-dark-400">Sector</p><p className="text-white font-medium">{dr.sector}</p></div><div className="bg-dark-800/50 rounded-lg p-2"><p className="text-dark-400">Market</p><p className="text-white font-medium">{dr.market}</p></div></div>
-        <div className="flex flex-wrap gap-1 mt-3">{dr.dividend > 1 && <span className="text-xs bg-accent-500/20 text-accent-400 px-2 py-0.5 rounded-full">💰 High Div</span>}{dr.changePercent > 2 && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-0.5 rounded-full">🔥 Hot</span>}{dr.tradingHours?.includes('กลางคืน') && <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">🌙 Night</span>}</div>
+        <div className="flex items-start justify-between mb-3"><div className="flex items-center space-x-3"><span className="text-3xl">{dr.logo}</span><div><h3 className="font-display font-bold text-black">{dr.symbol}</h3><p className="text-brutalist-muted text-xs truncate max-w-[150px]">{dr.name}</p></div></div><span className={`badge-${(dr.country || 'us').toLowerCase()} text-white text-xs px-2 py-1 font-bold`}>{dr.country}</span></div>
+        <div className="mb-3"><p className="font-display font-black text-xl text-black">฿{dr.price?.toLocaleString()}</p><p className={`text-sm font-bold ${priceClass}`}>{dr.change > 0 ? '+' : ''}{dr.change?.toFixed(2)} ({dr.changePercent > 0 ? '+' : ''}{dr.changePercent?.toFixed(2)}%)</p></div>
+        <div className="grid grid-cols-2 gap-2 text-xs"><div className="bg-gray-100 border-2 border-black p-2"><p className="text-brutalist-muted font-medium">Sector</p><p className="text-black font-bold">{dr.sector}</p></div><div className="bg-gray-100 border-2 border-black p-2"><p className="text-brutalist-muted font-medium">Market</p><p className="text-black font-bold">{dr.market}</p></div></div>
+        <div className="flex flex-wrap gap-1 mt-3">{dr.changePercent > 2 && <span className="text-xs bg-primary-500 text-black px-2 py-0.5 border-2 border-black font-bold">🔥 Hot</span>}{dr.tradingHours?.includes('กลางคืน') && <span className="text-xs bg-blue-400 text-black px-2 py-0.5 border-2 border-black font-bold">🌙 Night</span>}</div>
       </div>
     </div>
   );

@@ -7,57 +7,59 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'thai': ['IBM Plex Sans Thai', 'sans-serif'],
-        'display': ['Sora', 'sans-serif'],
+        'sans': ['Inter', 'IBM Plex Sans Thai', 'sans-serif'],
+        'display': ['Inter', 'sans-serif'],
+        'mono': ['JetBrains Mono', 'monospace'],
       },
       colors: {
+        // Neo-Brutalist Colors
         primary: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',  // Main orange
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+        },
+        accent: {
           50: '#f0fdf4',
           100: '#dcfce7',
           200: '#bbf7d0',
           300: '#86efac',
           400: '#4ade80',
-          500: '#22c55e',
+          500: '#22c55e',  // Green for positive
           600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
         },
-        accent: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-        },
-        dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
+        // Light theme base
+        brutalist: {
+          bg: '#e5e7eb',      // Light gray background
+          card: '#ffffff',     // White cards
+          border: '#000000',   // Black borders
+          text: '#000000',     // Black text
+          muted: '#6b7280',    // Gray muted text
         }
       },
+      boxShadow: {
+        'brutal': '4px 4px 0px 0px #000000',
+        'brutal-sm': '2px 2px 0px 0px #000000',
+        'brutal-lg': '6px 6px 0px 0px #000000',
+        'brutal-hover': '2px 2px 0px 0px #000000',
+        'brutal-orange': '4px 4px 0px 0px #f97316',
+      },
+      borderWidth: {
+        '3': '3px',
+      },
       animation: {
-        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
-        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+        'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
       },
       keyframes: {
         fadeInUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(34, 197, 94, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(34, 197, 94, 0.5)' },
         },
       },
     },
