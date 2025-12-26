@@ -12,6 +12,56 @@ const Spinner = () => (
   </div>
 );
 
+// Trading Session Indicator - shows if market is open or closed
+const TradingSessionIndicator = ({ tradingSession }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [sessionType, setSessionType] = useState('');
+
+  useEffect(() => {
+    const checkSession = () => {
+      const now = new Date();
+      // Convert to Bangkok time (UTC+7)
+      const bangkokHour = (now.getUTCHours() + 7) % 24;
+      const bangkokMinute = now.getUTCMinutes();
+      const currentTime = bangkokHour * 60 + bangkokMinute;
+
+      // Day session: 10:00-16:30 (600-990 minutes)
+      const dayStart = 10 * 60;       // 600
+      const dayEnd = 16 * 60 + 30;    // 990
+
+      // Night session: 19:00-03:00 (1140-180 minutes, crosses midnight)
+      const nightStart = 19 * 60;     // 1140
+      const nightEnd = 3 * 60;        // 180
+
+      const isDaySession = currentTime >= dayStart && currentTime <= dayEnd;
+      const isNightSession = tradingSession?.hasNightTrading &&
+        (currentTime >= nightStart || currentTime <= nightEnd);
+
+      if (isDaySession) {
+        setIsOpen(true);
+        setSessionType('☀️ กลางวัน');
+      } else if (isNightSession) {
+        setIsOpen(true);
+        setSessionType('🌙 กลางคืน');
+      } else {
+        setIsOpen(false);
+        setSessionType('ปิดทำการ');
+      }
+    };
+
+    checkSession();
+    const interval = setInterval(checkSession, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [tradingSession]);
+
+  return (
+    <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium ${isOpen ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+      <span className={`w-2 h-2 rounded-full ${isOpen ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></span>
+      <span>{isOpen ? sessionType : 'ปิดทำการ'}</span>
+    </div>
+  );
+};
+
 // Navigation Component
 const Navigation = () => {
   const location = useLocation();
@@ -210,7 +260,31 @@ const DRDetailModal = ({ dr, onClose }) => {
           <div className="grid lg:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div><h3 className="font-semibold text-white mb-3">ข้อมูล DR</h3><div className="grid grid-cols-2 gap-3">{[{ label: 'หลักทรัพย์อ้างอิง', value: dr.underlying }, { label: 'ตลาด', value: dr.market }, { label: 'ประเทศ', value: countryNames[dr.country] || dr.country }, { label: 'Sector', value: dr.sector }, { label: 'ผู้ออก', value: dr.issuer }, { label: 'Volume', value: (dr.volume || 0).toLocaleString() }].map((item, i) => (<div key={i} className="bg-dark-800/50 rounded-xl p-3"><p className="text-dark-400 text-[10px] mb-1">{item.label}</p><p className="text-white font-medium text-sm">{item.value || '-'}</p></div>))}</div></div>
-              <div><h3 className="font-semibold text-white mb-3">ข้อมูลทางการเงิน</h3><div className="grid grid-cols-2 gap-3"><div className="bg-gradient-to-br from-primary-500/10 to-transparent rounded-xl p-4"><p className="text-dark-300 text-[10px] mb-1">P/E Ratio</p><p className="font-display font-bold text-xl text-white">{dr.pe > 0 ? dr.pe?.toFixed(1) : 'N/A'}</p></div><div className="bg-gradient-to-br from-accent-500/10 to-transparent rounded-xl p-4"><p className="text-dark-300 text-[10px] mb-1">Div Yield</p><p className="font-display font-bold text-xl text-white">{dr.dividend > 0 ? dr.dividend?.toFixed(2) + '%' : '-'}</p></div></div></div>
+              <div><h3 className="font-semibold text-white mb-3">⏰ เวลาซื้อขาย</h3><div className="space-y-3">
+                <div className="bg-gradient-to-br from-primary-500/10 to-transparent rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-dark-300 text-sm">ช่วงเวลาซื้อขาย</p>
+                    <TradingSessionIndicator tradingSession={dr.tradingSession} />
+                  </div>
+                  <p className="font-display font-bold text-lg text-white">{dr.tradingHours || 'กลางวันเท่านั้น'}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-dark-800/50 rounded-xl p-3">
+                    <p className="text-dark-400 text-[10px] mb-1">☀️ กลางวัน</p>
+                    <p className="text-white font-medium text-sm">{dr.tradingSession?.daySession || '10:00-16:30'}</p>
+                  </div>
+                  {dr.tradingSession?.hasNightTrading && (
+                    <div className="bg-dark-800/50 rounded-xl p-3">
+                      <p className="text-dark-400 text-[10px] mb-1">🌙 กลางคืน</p>
+                      <p className="text-white font-medium text-sm">{dr.tradingSession?.nightSession || '19:00-03:00'}</p>
+                    </div>
+                  )}
+                  <div className="bg-dark-800/50 rounded-xl p-3">
+                    <p className="text-dark-400 text-[10px] mb-1">อัตราแปลง (DR:หุ้น)</p>
+                    <p className="text-white font-medium text-sm">{dr.ratio || '100:1'}</p>
+                  </div>
+                </div>
+              </div></div>
             </div>
 
             <div>

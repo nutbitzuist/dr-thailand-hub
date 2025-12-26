@@ -65,6 +65,37 @@ function detectCountry(market, underlying, symbol) {
   return 'US'; // Default
 }
 
+// Determine trading hours based on market
+// US/EU markets: Day (10:00-16:30) + Night (19:00-03:00)
+// Asian markets: Day only (10:00-16:30)
+function detectTradingHours(market, country) {
+  if (!market) market = '';
+  market = market.toUpperCase();
+
+  // US and European markets have night trading
+  const nightTradingMarkets = ['NASDAQ', 'NYSE', 'US', 'EURONEXT', 'LSE', 'XETRA', 'PARIS', 'AMSTERDAM'];
+  const nightTradingCountries = ['US', 'EU'];
+
+  const hasNightTrading = nightTradingMarkets.some(m => market.includes(m)) ||
+    nightTradingCountries.includes(country);
+
+  if (hasNightTrading) {
+    return {
+      session: 'กลางวัน+กลางคืน',
+      daySession: '10:00-16:30',
+      nightSession: '19:00-03:00',
+      hasNightTrading: true
+    };
+  }
+
+  return {
+    session: 'กลางวันเท่านั้น',
+    daySession: '10:00-16:30',
+    nightSession: null,
+    hasNightTrading: false
+  };
+}
+
 // Detect sector from name/underlying
 function detectSector(name, underlying) {
   const nameUpper = (name + ' ' + underlying).toUpperCase();
@@ -198,19 +229,22 @@ async function scrapeSET() {
         prevClose: item.prior || 0,
         issuer: 'Unknown', // Need to infer from symbol
         issuerCode: getIssuerCodeFromSuffix(item.symbol),
-        ratio: 'N/A',
-        tradingHours: 'N/A',
-        pe: 0,
-        dividend: 0,
+        ratio: item.drRatio || '100:1',
         marketCap: (item.marketCap || 0) * 1000000,
         logo: getCompanyLogo('', item.symbol),
         lastUpdate: new Date().toISOString()
-      })).map(dr => ({
-        ...dr,
-        country: detectCountry(dr.market, dr.underlying, dr.symbol),
-        sector: detectSector(dr.name, dr.underlying),
-        issuer: getIssuerName(dr.issuerCode)
-      }));
+      })).map(dr => {
+        const country = detectCountry(dr.market, dr.underlying, dr.symbol);
+        const tradingHoursInfo = detectTradingHours(dr.market, country);
+        return {
+          ...dr,
+          country,
+          sector: detectSector(dr.name, dr.underlying),
+          issuer: getIssuerName(dr.issuerCode),
+          tradingHours: tradingHoursInfo.session,
+          tradingSession: tradingHoursInfo,
+        };
+      });
     }
 
     return null;
@@ -491,12 +525,16 @@ function getFallbackDRData() {
     // Derive issuer code from symbol suffix (not from issuer text)
     const issuerCode = getIssuerCodeFromSuffix(item.symbol);
     const issuer = getIssuerName(issuerCode);
+    const country = detectCountry(item.market, item.underlying, item.symbol);
+    const tradingHoursInfo = detectTradingHours(item.market, country);
     return {
       ...item,
-      country: detectCountry(item.market, item.underlying, item.symbol),
+      country,
       sector: detectSector(item.name, item.underlying),
       issuerCode: issuerCode,
       issuer: issuer,  // Override with correct issuer name
+      tradingHours: tradingHoursInfo.session,
+      tradingSession: tradingHoursInfo,
       logo: getCompanyLogo(item.name, item.symbol),
       value: item.price * item.volume,
       lastUpdate: new Date().toISOString()
