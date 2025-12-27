@@ -286,7 +286,7 @@ const DRDetailModal = ({ dr, onClose }) => {
                 <div className="bg-gradient-to-br from-primary-500/10 to-transparent rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-brutalist-muted text-sm">ช่วงเวลาซื้อขาย</p>
-                    <TradingSessionIndicator tradingSession={dr.tradingSession} />
+                    <TradingSessionIndicator tradingSession={dr.tradingSession || { hasNightTrading: getTradingHours(dr).includes('กลางคืน') }} />
                   </div>
                   <p className="font-display font-bold text-lg text-black">{getTradingHours(dr)}</p>
                 </div>
@@ -295,7 +295,7 @@ const DRDetailModal = ({ dr, onClose }) => {
                     <p className="text-brutalist-muted text-[10px] mb-1">☀️ กลางวัน</p>
                     <p className="text-black font-medium text-sm">{dr.tradingSession?.daySession || '10:00-16:30'}</p>
                   </div>
-                  {dr.tradingSession?.hasNightTrading && (
+                  {(dr.tradingSession?.hasNightTrading || getTradingHours(dr).includes('กลางคืน')) && (
                     <div className="bg-gray-100/50 rounded-xl p-3">
                       <p className="text-brutalist-muted text-[10px] mb-1">🌙 กลางคืน</p>
                       <p className="text-black font-medium text-sm">{dr.tradingSession?.nightSession || '19:00-03:00'}</p>
