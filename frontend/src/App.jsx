@@ -247,7 +247,7 @@ const NewsSection = ({ symbol }) => {
 };
 
 // TradingView Chart Component
-const TradingViewChart = ({ symbol, underlying }) => {
+const TradingViewChart = ({ symbol, underlying, market }) => {
   const containerId = `tradingview_${symbol}`;
 
   useEffect(() => {
@@ -255,26 +255,46 @@ const TradingViewChart = ({ symbol, underlying }) => {
     const getTVSymbol = () => {
       if (!underlying) return 'NASDAQ:AAPL';
       const u = underlying.toUpperCase();
+      const m = (market || '').toUpperCase();
+
       // Map common symbols to their TradingView format
       const symbolMap = {
+        // US Stocks - NASDAQ
         'AAPL': 'NASDAQ:AAPL', 'MSFT': 'NASDAQ:MSFT', 'GOOGL': 'NASDAQ:GOOGL', 'GOOG': 'NASDAQ:GOOG',
         'META': 'NASDAQ:META', 'AMZN': 'NASDAQ:AMZN', 'NVDA': 'NASDAQ:NVDA', 'TSLA': 'NASDAQ:TSLA',
         'NFLX': 'NASDAQ:NFLX', 'AMD': 'NASDAQ:AMD', 'INTC': 'NASDAQ:INTC', 'COIN': 'NASDAQ:COIN',
-        'PLTR': 'NYSE:PLTR', 'UBER': 'NYSE:UBER', 'PYPL': 'NASDAQ:PYPL', 'CRM': 'NYSE:CRM',
-        'ORCL': 'NYSE:ORCL', 'ADBE': 'NASDAQ:ADBE', 'DIS': 'NYSE:DIS', 'V': 'NYSE:V',
-        'MA': 'NYSE:MA', 'JPM': 'NYSE:JPM', 'BAC': 'NYSE:BAC', 'WMT': 'NYSE:WMT',
-        'JNJ': 'NYSE:JNJ', 'PG': 'NYSE:PG', 'KO': 'NYSE:KO', 'PEP': 'NASDAQ:PEP',
-        'MCD': 'NYSE:MCD', 'NKE': 'NYSE:NKE', 'SBUX': 'NASDAQ:SBUX', 'COST': 'NASDAQ:COST',
-        'QQQ': 'NASDAQ:QQQ', 'SPY': 'AMEX:SPY',
+        'PYPL': 'NASDAQ:PYPL', 'ADBE': 'NASDAQ:ADBE', 'PEP': 'NASDAQ:PEP', 'SBUX': 'NASDAQ:SBUX',
+        'COST': 'NASDAQ:COST', 'QQQ': 'NASDAQ:QQQ', 'ASML': 'NASDAQ:ASML', 'AVGO': 'NASDAQ:AVGO',
+        // US Stocks - NYSE
+        'PLTR': 'NYSE:PLTR', 'UBER': 'NYSE:UBER', 'CRM': 'NYSE:CRM', 'ORCL': 'NYSE:ORCL',
+        'DIS': 'NYSE:DIS', 'V': 'NYSE:V', 'MA': 'NYSE:MA', 'JPM': 'NYSE:JPM', 'BAC': 'NYSE:BAC',
+        'WMT': 'NYSE:WMT', 'JNJ': 'NYSE:JNJ', 'PG': 'NYSE:PG', 'KO': 'NYSE:KO', 'MCD': 'NYSE:MCD',
+        'NKE': 'NYSE:NKE', 'SPY': 'AMEX:SPY', 'NIO': 'NYSE:NIO',
+        // China ADRs on US markets
+        'BABA': 'NYSE:BABA', 'JD': 'NASDAQ:JD', 'PDD': 'NASDAQ:PDD', 'BIDU': 'NASDAQ:BIDU',
+        'LI': 'NASDAQ:LI', 'XPEV': 'NYSE:XPEV',
         // Hong Kong stocks
-        '9988': 'HKEX:9988', 'BABA': 'NYSE:BABA', '700': 'HKEX:700', 'TENCENT': 'HKEX:700',
-        '1810': 'HKEX:1810', 'XIAOMI': 'HKEX:1810', '3690': 'HKEX:3690', 'MEITUAN': 'HKEX:3690',
+        '9988': 'HKEX:9988', '700': 'HKEX:700', '1810': 'HKEX:1810', '3690': 'HKEX:3690',
+        '1211': 'HKEX:1211', '2318': 'HKEX:2318', '939': 'HKEX:939', '1299': 'HKEX:1299',
+        'BYDCOM': 'HKEX:1211', 'TENCENT': 'HKEX:700', 'XIAOMI': 'HKEX:1810', 'MEITUAN': 'HKEX:3690',
         // Japan stocks
-        '7203': 'TSE:7203', 'TOYOTA': 'TSE:7203', '6758': 'TSE:6758', 'SONY': 'TSE:6758',
-        // China ADRs
-        'JD': 'NASDAQ:JD', 'PDD': 'NASDAQ:PDD', 'BIDU': 'NASDAQ:BIDU', 'NIO': 'NYSE:NIO',
+        '7203': 'TSE:7203', '6758': 'TSE:6758', 'TOYOTA': 'TSE:7203', 'SONY': 'TSE:6758',
       };
-      return symbolMap[u] || `NASDAQ:${u}`;
+
+      // Check if we have an exact mapping
+      if (symbolMap[u]) return symbolMap[u];
+
+      // Determine exchange from market field
+      if (m.includes('HKEX') || m.includes('HK')) return `HKEX:${u}`;
+      if (m.includes('TSE') || m.includes('TOKYO') || m.includes('JP')) return `TSE:${u}`;
+      if (m.includes('SSE') || m.includes('SHANGHAI')) return `SSE:${u}`;
+      if (m.includes('SZSE') || m.includes('SHENZHEN')) return `SZSE:${u}`;
+      if (m.includes('SGX') || m.includes('SINGAPORE')) return `SGX:${u}`;
+      if (m.includes('NYSE')) return `NYSE:${u}`;
+      if (m.includes('NASDAQ')) return `NASDAQ:${u}`;
+
+      // Default fallback - try NASDAQ first (most common)
+      return `NASDAQ:${u}`;
     };
 
     const script = document.createElement('script');
@@ -301,7 +321,7 @@ const TradingViewChart = ({ symbol, underlying }) => {
     return () => {
       if (container) container.innerHTML = '';
     };
-  }, [symbol, underlying, containerId]);
+  }, [symbol, underlying, market, containerId]);
 
   return (
     <div className="h-48 w-full bg-white border-2 border-black overflow-hidden">
@@ -323,7 +343,7 @@ const DRDetailModal = ({ dr, onClose }) => {
         <div className="p-6 space-y-8">
           <div className="bg-white border-3 border-black shadow-brutal p-6"><div className="flex items-end justify-between"><div><p className="text-brutalist-muted text-sm mb-1">ราคาล่าสุด</p><p className="font-display font-bold text-4xl text-black">฿{dr.price?.toLocaleString()}</p></div><div className={`text-right ${priceClass}`}><p className="text-2xl font-bold">{dr.changePercent > 0 ? '+' : ''}{dr.changePercent?.toFixed(2)}%</p><p className="text-sm">{dr.change > 0 ? '+' : ''}{dr.change?.toFixed(2)} บาท</p></div></div></div>
 
-          <TradingViewChart symbol={dr.symbol} underlying={dr.underlying} />
+          <TradingViewChart symbol={dr.symbol} underlying={dr.underlying} market={dr.market} />
 
           <div className="grid lg:grid-cols-2 gap-8">
             <div className="space-y-6">
