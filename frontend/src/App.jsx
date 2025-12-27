@@ -254,46 +254,78 @@ const TradingViewChart = ({ symbol, underlying, market }) => {
     // Determine the correct TradingView symbol
     const getTVSymbol = () => {
       if (!underlying) return 'NASDAQ:AAPL';
-      const u = underlying.toUpperCase();
+      // Clean up underlying - remove .HK, .T suffixes for lookup but keep original for fallback
+      const origU = underlying.toUpperCase();
+      const u = origU.replace(/\.(HK|T|PA|AS|SI)$/i, '');
       const m = (market || '').toUpperCase();
 
-      // Map common symbols to their TradingView format
+      // Comprehensive symbol mappings for all DRs
       const symbolMap = {
-        // US Stocks - NASDAQ
+        // === US STOCKS - NASDAQ ===
         'AAPL': 'NASDAQ:AAPL', 'MSFT': 'NASDAQ:MSFT', 'GOOGL': 'NASDAQ:GOOGL', 'GOOG': 'NASDAQ:GOOG',
         'META': 'NASDAQ:META', 'AMZN': 'NASDAQ:AMZN', 'NVDA': 'NASDAQ:NVDA', 'TSLA': 'NASDAQ:TSLA',
         'NFLX': 'NASDAQ:NFLX', 'AMD': 'NASDAQ:AMD', 'INTC': 'NASDAQ:INTC', 'COIN': 'NASDAQ:COIN',
         'PYPL': 'NASDAQ:PYPL', 'ADBE': 'NASDAQ:ADBE', 'PEP': 'NASDAQ:PEP', 'SBUX': 'NASDAQ:SBUX',
         'COST': 'NASDAQ:COST', 'QQQ': 'NASDAQ:QQQ', 'ASML': 'NASDAQ:ASML', 'AVGO': 'NASDAQ:AVGO',
-        // US Stocks - NYSE
+        'JD': 'NASDAQ:JD', 'PDD': 'NASDAQ:PDD', 'BIDU': 'NASDAQ:BIDU', 'LI': 'NASDAQ:LI', 'GRAB': 'NASDAQ:GRAB',
+        // === US STOCKS - NYSE ===
         'PLTR': 'NYSE:PLTR', 'UBER': 'NYSE:UBER', 'CRM': 'NYSE:CRM', 'ORCL': 'NYSE:ORCL',
         'DIS': 'NYSE:DIS', 'V': 'NYSE:V', 'MA': 'NYSE:MA', 'JPM': 'NYSE:JPM', 'BAC': 'NYSE:BAC',
         'WMT': 'NYSE:WMT', 'JNJ': 'NYSE:JNJ', 'PG': 'NYSE:PG', 'KO': 'NYSE:KO', 'MCD': 'NYSE:MCD',
-        'NKE': 'NYSE:NKE', 'SPY': 'AMEX:SPY', 'NIO': 'NYSE:NIO',
-        // China ADRs on US markets
-        'BABA': 'NYSE:BABA', 'JD': 'NASDAQ:JD', 'PDD': 'NASDAQ:PDD', 'BIDU': 'NASDAQ:BIDU',
-        'LI': 'NASDAQ:LI', 'XPEV': 'NYSE:XPEV',
-        // Hong Kong stocks
-        '9988': 'HKEX:9988', '700': 'HKEX:700', '1810': 'HKEX:1810', '3690': 'HKEX:3690',
-        '1211': 'HKEX:1211', '2318': 'HKEX:2318', '939': 'HKEX:939', '1299': 'HKEX:1299',
-        'BYDCOM': 'HKEX:1211', 'TENCENT': 'HKEX:700', 'XIAOMI': 'HKEX:1810', 'MEITUAN': 'HKEX:3690',
-        // Japan stocks
-        '7203': 'TSE:7203', '6758': 'TSE:6758', 'TOYOTA': 'TSE:7203', 'SONY': 'TSE:6758',
+        'NKE': 'NYSE:NKE', 'NIO': 'NYSE:NIO', 'XPEV': 'NYSE:XPEV', 'SHOP': 'NYSE:SHOP', 'SQ': 'NYSE:SQ',
+        'BABA': 'NYSE:BABA', 'ONON': 'NYSE:ONON',
+        'SPY': 'AMEX:SPY',
+        // === HONG KONG STOCKS (HKEX) ===
+        '0700': 'HKEX:700', '700': 'HKEX:700', 'TENCENT': 'HKEX:700',
+        '1211': 'HKEX:1211', 'BYDCOM': 'HKEX:1211', 'BYD': 'HKEX:1211',
+        '1810': 'HKEX:1810', 'XIAOMI': 'HKEX:1810',
+        '3690': 'HKEX:3690', 'MEITUAN': 'HKEX:3690',
+        '9988': 'HKEX:9988', '2318': 'HKEX:2318', '939': 'HKEX:939', '1299': 'HKEX:1299',
+        '3086': 'HKEX:3086', '3188': 'HKEX:3188', '2800': 'HKEX:2800', '3032': 'HKEX:3032',
+        '6690': 'HKEX:6690', 'HAIERS': 'HKEX:6690', 'HAIER': 'HKEX:6690',
+        '2020': 'HKEX:2020', 'ANTA': 'HKEX:2020',
+        '3347': 'HKEX:3347', 'CNSEMI': 'HKEX:3347',
+        '1157': 'HKEX:1157', 'CNROBA': 'HKEX:1157',
+        '992': 'HKEX:992', 'LENOVO': 'HKEX:992',
+        'NOVO': 'NYSE:NVO',
+        // === JAPAN STOCKS (TSE) ===
+        '7203': 'TSE:7203', 'TOYOTA': 'TSE:7203',
+        '6758': 'TSE:6758', 'SONY': 'TSE:6758',
+        '7974': 'TSE:7974', 'NINTENDO': 'TSE:7974',
+        '7267': 'TSE:7267', 'HONDA': 'TSE:7267',
+        '6861': 'TSE:6861', 'KEYENCE': 'TSE:6861',
+        '6857': 'TSE:6857', 'ADVANT': 'TSE:6857', 'ADVANTEST': 'TSE:6857',
+        // === EUROPE STOCKS ===
+        'MC': 'EURONEXT:MC', 'LVMH': 'EURONEXT:MC',
+        'RMS': 'EURONEXT:RMS', 'HERMES': 'EURONEXT:RMS',
+        // === SINGAPORE STOCKS (SGX) ===
+        'D05': 'SGX:D05', 'DBS': 'SGX:D05',
+        'U11': 'SGX:U11', 'UOB': 'SGX:U11',
+        // === ETFs ===
+        'E1VFVN30': 'HOSE:E1VFVN30', 'FUEVFVND': 'HOSE:FUEVFVND',
+        'GOLD19': 'HKEX:2840',
       };
 
       // Check if we have an exact mapping
       if (symbolMap[u]) return symbolMap[u];
 
+      // Try parsing underlying with suffix format (e.g., 0700.HK, 7203.T)
+      if (origU.includes('.HK')) return `HKEX:${u}`;
+      if (origU.includes('.T')) return `TSE:${u}`;
+      if (origU.includes('.PA')) return `EURONEXT:${u}`;
+      if (origU.includes('.AS')) return `EURONEXT:${u}`;
+      if (origU.includes('.SI')) return `SGX:${u}`;
+
       // Determine exchange from market field
       if (m.includes('HKEX') || m.includes('HK')) return `HKEX:${u}`;
-      if (m.includes('TSE') || m.includes('TOKYO') || m.includes('JP')) return `TSE:${u}`;
-      if (m.includes('SSE') || m.includes('SHANGHAI')) return `SSE:${u}`;
-      if (m.includes('SZSE') || m.includes('SHENZHEN')) return `SZSE:${u}`;
+      if (m.includes('TSE') || m.includes('TOKYO') || m.includes('JAPAN')) return `TSE:${u}`;
+      if (m.includes('EURONEXT') || m.includes('PARIS') || m.includes('AMSTERDAM')) return `EURONEXT:${u}`;
       if (m.includes('SGX') || m.includes('SINGAPORE')) return `SGX:${u}`;
+      if (m.includes('HOSE') || m.includes('VN') || m.includes('VIETNAM')) return `HOSE:${u}`;
       if (m.includes('NYSE')) return `NYSE:${u}`;
       if (m.includes('NASDAQ')) return `NASDAQ:${u}`;
 
-      // Default fallback - try NASDAQ first (most common)
+      // Default fallback
       return `NASDAQ:${u}`;
     };
 
@@ -339,7 +371,7 @@ const DRDetailModal = ({ dr, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60"></div>
       <div className="relative bg-white border-4 border-black shadow-brutal-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-        <div className="sticky top-0 bg-white p-6 border-b-3 border-black z-20"><button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 border-2 border-black bg-white hover:bg-gray-100 flex items-center justify-center font-bold">✕</button><div className="flex items-center space-x-4"><span className="text-5xl">{dr.logo}</span><div><h2 className="font-display font-black text-2xl text-black">{dr.symbol}</h2><p className="text-brutalist-muted font-medium">{dr.name}</p></div></div></div>
+        <div className="sticky top-0 bg-white p-6 border-b-3 border-black z-20"><button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 border-2 border-black bg-white hover:bg-gray-100 flex items-center justify-center font-bold text-black text-xl">✕</button><div className="flex items-center space-x-4"><span className="text-5xl">{dr.logo}</span><div><h2 className="font-display font-black text-2xl text-black">{dr.symbol}</h2><p className="text-brutalist-muted font-medium">{dr.name}</p></div></div></div>
         <div className="p-6 space-y-8">
           <div className="bg-white border-3 border-black shadow-brutal p-6"><div className="flex items-end justify-between"><div><p className="text-brutalist-muted text-sm mb-1">ราคาล่าสุด</p><p className="font-display font-bold text-4xl text-black">฿{dr.price?.toLocaleString()}</p></div><div className={`text-right ${priceClass}`}><p className="text-2xl font-bold">{dr.changePercent > 0 ? '+' : ''}{dr.changePercent?.toFixed(2)}%</p><p className="text-sm">{dr.change > 0 ? '+' : ''}{dr.change?.toFixed(2)} บาท</p></div></div></div>
 
