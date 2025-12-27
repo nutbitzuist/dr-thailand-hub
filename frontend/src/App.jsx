@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, NavLink, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { drAPI, brokerAPI } from './services/api';
 
-// Country names mapping
-const countryNames = { US: 'สหรัฐฯ', CN: 'จีน', HK: 'ฮ่องกง', JP: 'ญี่ปุ่น', SG: 'สิงคโปร์', VN: 'เวียดนาม', EU: 'ยุโรป', TW: 'ไต้หวัน', KR: 'เกาหลีใต้' };
+// Country names mapping - ordered by importance (major markets first)
+const countryNames = { US: 'สหรัฐฯ', HK: 'ฮ่องกง', JP: 'ญี่ปุ่น', EU: 'ยุโรป', SG: 'สิงคโปร์', VN: 'เวียดนาม', CN: 'จีน', TW: 'ไต้หวัน', KR: 'เกาหลีใต้' };
 
 // Helper to determine trading hours from DR data (fallback when backend data is missing)
 const getTradingHours = (dr) => {
@@ -540,7 +540,7 @@ const HomePage = ({ setSelectedDR, drList, loading, marketOverview, rankings, br
           <div className="bg-white border-3 border-black shadow-brutal p-6">
             <h3 className="font-display font-bold text-black mb-4">🌍 DR ตามประเทศ</h3>
             <div className="grid grid-cols-2 gap-3">
-              {Object.entries(countryNames).slice(0, 6).map(([code, name]) => {
+              {Object.entries(countryNames).filter(([code]) => drList.some(d => d.country === code)).map(([code, name]) => {
                 const count = drList.filter(d => d.country === code).length;
                 if (count === 0) return null;
                 const flagUrls = {
@@ -886,11 +886,15 @@ const StocksPage = ({ drList }) => {
     ? underlyingStocks
     : underlyingStocks.filter(s => s.country === selectedCountry);
 
-  // Get related DRs for each stock
-  const getRelatedDRs = (underlying) => drList.filter(dr =>
-    dr.underlying?.toUpperCase().includes(underlying.toUpperCase()) ||
-    dr.symbol?.toUpperCase().includes(underlying.toUpperCase())
-  );
+  // Get related DRs for each stock - improved matching with suffix handling
+  const getRelatedDRs = (stockSymbol) => {
+    const cleanSymbol = stockSymbol.toUpperCase().replace(/\.(HK|T|PA|AS|SI)$/i, '');
+    return drList.filter(dr => {
+      const drUnderlying = (dr.underlying || '').toUpperCase().replace(/\.(HK|T|PA|AS|SI)$/i, '');
+      const drSymbol = (dr.symbol || '').toUpperCase().replace(/\d+$/, ''); // Remove trailing numbers like 80, 01, 19
+      return drUnderlying.includes(cleanSymbol) || drUnderlying === cleanSymbol || drSymbol === cleanSymbol;
+    });
+  };
 
   return (
     <div className="animate-fade-in-up">
@@ -952,10 +956,13 @@ const StockDetailPage = ({ drList, setSelectedDR }) => {
   const { symbol } = useParams();
   const navigate = useNavigate();
   const stock = underlyingStocks.find(s => s.symbol.toUpperCase() === symbol?.toUpperCase());
-  const relatedDRs = drList.filter(dr =>
-    dr.underlying?.toUpperCase().includes(symbol?.toUpperCase()) ||
-    dr.symbol?.toUpperCase().includes(symbol?.toUpperCase())
-  );
+  // Improved matching with suffix handling
+  const cleanSymbol = symbol?.toUpperCase().replace(/\.(HK|T|PA|AS|SI)$/i, '') || '';
+  const relatedDRs = drList.filter(dr => {
+    const drUnderlying = (dr.underlying || '').toUpperCase().replace(/\.(HK|T|PA|AS|SI)$/i, '');
+    const drSymbolClean = (dr.symbol || '').toUpperCase().replace(/\d+$/, ''); // Remove trailing numbers
+    return drUnderlying.includes(cleanSymbol) || drUnderlying === cleanSymbol || drSymbolClean === cleanSymbol;
+  });
 
   if (!stock) {
     return (
