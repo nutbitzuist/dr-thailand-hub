@@ -692,44 +692,186 @@ const ScreenerPage = ({ setSelectedDR, drList, brokers }) => {
   );
 };
 
-// Underlying Stocks Data - all securities from DRs
+// Underlying Stocks Data - all securities from DRs with detailed Thai descriptions
 const underlyingStocks = [
-  // US Stocks - NASDAQ
-  { symbol: 'AAPL', name: 'Apple Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'บริษัทเทคโนโลยีผู้ผลิต iPhone, Mac และบริการดิจิทัล' },
-  { symbol: 'MSFT', name: 'Microsoft Corporation', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'ผู้นำด้านซอฟต์แวร์และคลาวด์คอมพิวติ้ง' },
-  { symbol: 'GOOGL', name: 'Alphabet Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'บริษัทแม่ของ Google และ YouTube' },
-  { symbol: 'META', name: 'Meta Platforms', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'บริษัทแม่ของ Facebook, Instagram และ WhatsApp' },
-  { symbol: 'AMZN', name: 'Amazon.com', country: 'US', market: 'NASDAQ', sector: 'E-Commerce', description: 'ยักษ์ใหญ่อีคอมเมิร์ซและคลาวด์' },
-  { symbol: 'NVDA', name: 'NVIDIA Corporation', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'ผู้นำด้าน GPU และ AI chips' },
-  { symbol: 'TSLA', name: 'Tesla Inc.', country: 'US', market: 'NASDAQ', sector: 'Auto', description: 'ผู้นำรถยนต์ไฟฟ้าและพลังงานสะอาด' },
-  { symbol: 'NFLX', name: 'Netflix Inc.', country: 'US', market: 'NASDAQ', sector: 'Entertainment', description: 'แพลตฟอร์มสตรีมมิ่งชั้นนำของโลก' },
-  { symbol: 'AMD', name: 'Advanced Micro Devices', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'ผู้พัฒนา CPU และ GPU' },
-  { symbol: 'AVGO', name: 'Broadcom Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'บริษัทเซมิคอนดักเตอร์และซอฟต์แวร์' },
-  { symbol: 'COST', name: 'Costco Wholesale', country: 'US', market: 'NASDAQ', sector: 'Retail', description: 'ร้านค้าปลีกแบบสมาชิกรายใหญ่' },
-  { symbol: 'COIN', name: 'Coinbase Global', country: 'US', market: 'NASDAQ', sector: 'Finance', description: 'แพลตฟอร์มซื้อขายคริปโตฯ ชั้นนำ' },
-  // US Stocks - NYSE
-  { symbol: 'BABA', name: 'Alibaba Group', country: 'US', market: 'NYSE', sector: 'E-Commerce', description: 'อีคอมเมิร์ซและคลาวด์จีน' },
-  { symbol: 'PLTR', name: 'Palantir Technologies', country: 'US', market: 'NYSE', sector: 'Technology', description: 'บริษัทวิเคราะห์ข้อมูลและ AI' },
-  { symbol: 'UBER', name: 'Uber Technologies', country: 'US', market: 'NYSE', sector: 'Technology', description: 'แพลตฟอร์มเรียกรถและส่งอาหาร' },
-  { symbol: 'NIO', name: 'NIO Inc.', country: 'US', market: 'NYSE', sector: 'Auto', description: 'บริษัทรถยนต์ไฟฟ้าจีน' },
-  // Hong Kong Stocks
-  { symbol: '700', name: 'Tencent Holdings', country: 'HK', market: 'HKEX', sector: 'Technology', description: 'ยักษ์ใหญ่เทคโนโลยีจีน WeChat, Gaming' },
-  { symbol: '1211', name: 'BYD Company', country: 'HK', market: 'HKEX', sector: 'Auto', description: 'ผู้ผลิตรถยนต์ไฟฟ้าและแบตเตอรี่' },
-  { symbol: '1810', name: 'Xiaomi Corporation', country: 'HK', market: 'HKEX', sector: 'Technology', description: 'ผู้ผลิตสมาร์ทโฟนและ IoT' },
-  { symbol: '3690', name: 'Meituan', country: 'HK', market: 'HKEX', sector: 'Technology', description: 'แพลตฟอร์มส่งอาหารและบริการ' },
-  // Japan Stocks
-  { symbol: '7203', name: 'Toyota Motor', country: 'JP', market: 'TSE', sector: 'Auto', description: 'ผู้ผลิตรถยนต์ใหญ่ที่สุดในญี่ปุ่น' },
-  { symbol: '6758', name: 'Sony Group', country: 'JP', market: 'TSE', sector: 'Technology', description: 'บริษัทอิเล็กทรอนิกส์และเกม' },
-  { symbol: '6861', name: 'Keyence Corporation', country: 'JP', market: 'TSE', sector: 'Technology', description: 'ผู้นำเซ็นเซอร์และระบบอัตโนมัติ' },
-  { symbol: '7974', name: 'Nintendo Co.', country: 'JP', market: 'TSE', sector: 'Gaming', description: 'ผู้ผลิตเกมและคอนโซลชื่อดัง' },
-  // Europe Stocks
-  { symbol: 'NOVOB', name: 'Novo Nordisk', country: 'EU', market: 'CPH', sector: 'Healthcare', description: 'ผู้นำยารักษาเบาหวานและโรคอ้วน' },
-  { symbol: 'MC', name: 'LVMH Moët Hennessy', country: 'EU', market: 'Euronext Paris', sector: 'Luxury', description: 'กลุ่มสินค้าหรูหราใหญ่ที่สุดในโลก' },
-  { symbol: 'RMS', name: 'Hermès International', country: 'EU', market: 'Euronext Paris', sector: 'Luxury', description: 'แบรนด์หรูระดับตำนาน' },
-  { symbol: 'ASML', name: 'ASML Holding', country: 'EU', market: 'Euronext Amsterdam', sector: 'Technology', description: 'ผู้ผลิตเครื่องทำชิปเซมิคอนดักเตอร์' },
-  // Singapore
-  { symbol: 'D05', name: 'DBS Group Holdings', country: 'SG', market: 'SGX', sector: 'Finance', description: 'ธนาคารใหญ่ที่สุดในเอเชียตะวันออกเฉียงใต้' },
-  { symbol: 'U11', name: 'United Overseas Bank', country: 'SG', market: 'SGX', sector: 'Finance', description: 'ธนาคารชั้นนำของสิงคโปร์' },
+  // === US STOCKS ===
+  {
+    symbol: 'AAPL', name: 'Apple Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology',
+    description: 'Apple เป็นบริษัทเทคโนโลยีระดับโลกที่โด่งดังจากการสร้างนวัตกรรมที่เปลี่ยนโลก ผลิตภัณฑ์หลักได้แก่ iPhone, iPad, Mac, Apple Watch และ AirPods รวมถึงบริการต่างๆ เช่น App Store, Apple Music, iCloud และ Apple TV+ บริษัทขึ้นชื่อเรื่องการออกแบบที่หรูหราและระบบนิเวศที่เชื่อมต่อกันอย่างลงตัว มูลค่าตลาดของ Apple สูงกว่า 3 ล้านล้านดอลลาร์ ทำให้เป็นหนึ่งในบริษัทที่มีมูลค่าสูงที่สุดในโลก'
+  },
+  {
+    symbol: 'MSFT', name: 'Microsoft Corporation', country: 'US', market: 'NASDAQ', sector: 'Technology',
+    description: 'Microsoft เป็นยักษ์ใหญ่ด้านซอฟต์แวร์ที่ก่อตั้งโดย Bill Gates ผลิตภัณฑ์หลักได้แก่ Windows, Office 365, Azure (คลาวด์), LinkedIn และ Xbox บริษัทเป็นผู้นำในตลาด Enterprise Software และกำลังเติบโตอย่างรวดเร็วในด้าน AI ผ่านการลงทุนใน OpenAI รายได้หลักมาจากธุรกิจคลาวด์ Azure ที่เติบโตกว่า 30% ต่อปี'
+  },
+  {
+    symbol: 'GOOGL', name: 'Alphabet Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology',
+    description: 'Alphabet เป็นบริษัทแม่ของ Google ซึ่งครองตลาดเสิร์ชเอนจิ้นกว่า 90% ของโลก ผลิตภัณฑ์หลักได้แก่ Google Search, YouTube, Gmail, Google Maps, Chrome และ Android รายได้หลักมาจากโฆษณาดิจิทัล บริษัทยังลงทุนหนักในด้าน AI และรถยนต์ไร้คนขับผ่าน Waymo'
+  },
+  {
+    symbol: 'META', name: 'Meta Platforms', country: 'US', market: 'NASDAQ', sector: 'Technology',
+    description: 'Meta (เดิมชื่อ Facebook) เป็นบริษัทโซเชียลมีเดียที่ใหญ่ที่สุดในโลก ครอบครอง Facebook, Instagram, WhatsApp และ Messenger มีผู้ใช้งานรวมกว่า 3 พันล้านคนต่อเดือน บริษัทกำลังลงทุนหนักใน Metaverse และ AI รายได้หลักมาจากโฆษณาบนแพลตฟอร์มโซเชียล'
+  },
+  {
+    symbol: 'AMZN', name: 'Amazon.com', country: 'US', market: 'NASDAQ', sector: 'E-Commerce',
+    description: 'Amazon เป็นบริษัทอีคอมเมิร์ซและคลาวด์ที่ใหญ่ที่สุดในโลก ก่อตั้งโดย Jeff Bezos ธุรกิจหลักได้แก่ Marketplace, Amazon Prime, AWS (Amazon Web Services) ซึ่งเป็นผู้นำตลาดคลาวด์ นอกจากนี้ยังมี Alexa, Kindle และ Whole Foods กำไรส่วนใหญ่มาจาก AWS'
+  },
+  {
+    symbol: 'NVDA', name: 'NVIDIA Corporation', country: 'US', market: 'NASDAQ', sector: 'Technology',
+    description: 'NVIDIA เป็นผู้นำระดับโลกในด้าน GPU (Graphics Processing Unit) และชิป AI ผลิตภัณฑ์หลักได้แก่ GeForce สำหรับเกม, Quadro สำหรับมืออาชีพ และ H100/A100 สำหรับ AI และ Data Center บริษัทได้รับประโยชน์มหาศาลจากกระแส AI Boom และมีส่วนแบ่งตลาดชิป AI กว่า 80%'
+  },
+  {
+    symbol: 'TSLA', name: 'Tesla Inc.', country: 'US', market: 'NASDAQ', sector: 'Auto',
+    description: 'Tesla เป็นผู้นำตลาดรถยนต์ไฟฟ้า (EV) ก่อตั้งโดย Elon Musk ผลิตภัณฑ์หลักได้แก่ Model S, Model 3, Model X, Model Y และ Cybertruck นอกจากนี้ยังมีธุรกิจพลังงานแสงอาทิตย์และ Powerwall บริษัทมี Gigafactory ทั่วโลกและกำลังพัฒนาเทคโนโลยี Full Self-Driving'
+  },
+  {
+    symbol: 'NFLX', name: 'Netflix Inc.', country: 'US', market: 'NASDAQ', sector: 'Entertainment',
+    description: 'Netflix เป็นแพลตฟอร์มสตรีมมิ่งวิดีโอชั้นนำของโลก มีสมาชิกกว่า 230 ล้านคนใน 190 ประเทศ ผลิตเนื้อหาออริจินอลมากมายเช่น Stranger Things, Squid Game และ The Crown บริษัทเพิ่งเปิดตัว Ad-supported tier เพื่อขยายฐานลูกค้า'
+  },
+  {
+    symbol: 'AMD', name: 'Advanced Micro Devices', country: 'US', market: 'NASDAQ', sector: 'Technology',
+    description: 'AMD เป็นบริษัทชิปคู่แข่งหลักของ Intel และ NVIDIA ผลิตภัณฑ์หลักได้แก่ CPU Ryzen, GPU Radeon และชิปสำหรับ Data Center ภายใต้ชื่อ EPYC บริษัทเติบโตอย่างรวดเร็วจากการแย่งส่วนแบ่งตลาดจาก Intel และกำลังรุกเข้าสู่ตลาด AI'
+  },
+  {
+    symbol: 'AVGO', name: 'Broadcom Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology',
+    description: 'Broadcom เป็นบริษัทเซมิคอนดักเตอร์และซอฟต์แวร์โครงสร้างพื้นฐาน ผลิตชิปสำหรับ Networking, Storage และ Wireless บริษัทเพิ่งเข้าซื้อ VMware เพื่อขยายธุรกิจซอฟต์แวร์ รายได้มาจากลูกค้าขนาดใหญ่เช่น Apple และผู้ให้บริการคลาวด์'
+  },
+  {
+    symbol: 'COST', name: 'Costco Wholesale', country: 'US', market: 'NASDAQ', sector: 'Retail',
+    description: 'Costco เป็นร้านค้าปลีกแบบสมาชิก (Warehouse Club) ใหญ่อันดับ 2 ของโลก ขายสินค้าหลากหลายตั้งแต่อาหาร เครื่องใช้ไฟฟ้า จนถึงเครื่องประดับ จุดเด่นคือราคาถูกและสินค้า Kirkland Signature ของบริษัทเอง มีสมาชิกกว่า 120 ล้านคนทั่วโลก'
+  },
+  {
+    symbol: 'COIN', name: 'Coinbase Global', country: 'US', market: 'NASDAQ', sector: 'Finance',
+    description: 'Coinbase เป็นแพลตฟอร์มซื้อขายคริปโตเคอร์เรนซีที่ใหญ่ที่สุดในสหรัฐฯ รองรับเหรียญกว่า 250 สกุล รายได้หลักมาจากค่าธรรมเนียมการซื้อขาย บริษัทมีใบอนุญาตจาก SEC และถือว่าเป็น Crypto Exchange ที่ถูกกฎหมายที่สุด'
+  },
+  {
+    symbol: 'PLTR', name: 'Palantir Technologies', country: 'US', market: 'NYSE', sector: 'Technology',
+    description: 'Palantir เป็นบริษัทซอฟต์แวร์วิเคราะห์ข้อมูลและ AI ที่เชี่ยวชาญด้าน Big Data ลูกค้าหลักคือรัฐบาลสหรัฐฯ และหน่วยข่าวกรอง ผลิตภัณฑ์หลักได้แก่ Gotham สำหรับภาครัฐ และ Foundry สำหรับภาคเอกชน'
+  },
+  {
+    symbol: 'UBER', name: 'Uber Technologies', country: 'US', market: 'NYSE', sector: 'Technology',
+    description: 'Uber เป็นแพลตฟอร์มเรียกรถและส่งอาหารที่ใหญ่ที่สุดในโลก ให้บริการใน 70+ ประเทศ ธุรกิจหลักได้แก่ Uber Ride, Uber Eats และ Uber Freight บริษัทเพิ่งทำกำไรได้ครั้งแรกหลังจากขาดทุนมาหลายปี'
+  },
+  {
+    symbol: 'BABA', name: 'Alibaba Group', country: 'US', market: 'NYSE', sector: 'E-Commerce',
+    description: 'Alibaba เป็นยักษ์ใหญ่อีคอมเมิร์ซของจีน ก่อตั้งโดย Jack Ma ธุรกิจหลักได้แก่ Taobao, Tmall, Alipay และ Alibaba Cloud แม้จะ IPO ในสหรัฐฯ แต่รายได้ส่วนใหญ่มาจากจีน บริษัทกำลังปรับโครงสร้างและแยกธุรกิจออกเป็นหลายส่วน'
+  },
+  {
+    symbol: 'JD', name: 'JD.com Inc.', country: 'US', market: 'NASDAQ', sector: 'E-Commerce',
+    description: 'JD.com เป็นอีคอมเมิร์ซรายใหญ่อันดับ 2 ของจีน รองจาก Alibaba จุดเด่นคือมีระบบโลจิสติกส์เป็นของตัวเอง ส่งสินค้าได้ภายในวันเดียวในหลายเมือง เน้นขายสินค้าของแท้และอิเล็กทรอนิกส์'
+  },
+  {
+    symbol: 'PDD', name: 'PDD Holdings', country: 'US', market: 'NASDAQ', sector: 'E-Commerce',
+    description: 'PDD Holdings (Pinduoduo) เป็นแพลตฟอร์มอีคอมเมิร์ซที่เติบโตเร็วที่สุดในจีน เน้นขายสินค้าราคาถูกผ่านระบบ Social Shopping และ Group Buying นอกจากนี้ยังมี Temu ที่กำลังขยายตลาดในสหรัฐฯ และยุโรป'
+  },
+  {
+    symbol: 'NIO', name: 'NIO Inc.', country: 'US', market: 'NYSE', sector: 'Auto',
+    description: 'NIO เป็นบริษัทรถยนต์ไฟฟ้าพรีเมียมของจีน คู่แข่งของ Tesla ในตลาดจีน จุดเด่นคือระบบ Battery Swap ที่เปลี่ยนแบตเตอรี่ได้ใน 5 นาที รุ่นยอดนิยมได้แก่ ES6, ES8 และ ET7'
+  },
+  {
+    symbol: 'XPEV', name: 'XPeng Inc.', country: 'US', market: 'NYSE', sector: 'Auto',
+    description: 'XPeng เป็นบริษัท EV ของจีนที่เน้นเทคโนโลยีขับขี่อัตโนมัติ ผลิตภัณฑ์หลักได้แก่ P7 รถสปอร์ตไฟฟ้า และ G9 SUV ไฟฟ้า บริษัทมีระบบ XPILOT ที่แข่งกับ Tesla Autopilot'
+  },
+  {
+    symbol: 'LI', name: 'Li Auto Inc.', country: 'US', market: 'NASDAQ', sector: 'Auto',
+    description: 'Li Auto เป็นบริษัท EV ของจีนที่เน้นรถ SUV แบบ Extended Range (EREV) ซึ่งมีทั้งมอเตอร์ไฟฟ้าและเครื่องยนต์เล็กสำหรับชาร์จ รุ่นยอดนิยมได้แก่ L7, L8 และ L9 ซึ่งเหมาะกับครอบครัว'
+  },
+  {
+    symbol: 'GRAB', name: 'Grab Holdings', country: 'US', market: 'NASDAQ', sector: 'Technology',
+    description: 'Grab เป็น Super App ของเอเชียตะวันออกเฉียงใต้ ให้บริการเรียกรถ ส่งอาหาร และ Digital Payment ในสิงคโปร์ มาเลเซีย อินโดนีเซีย ไทย เวียดนาม และฟิลิปปินส์ เป็นคู่แข่งหลักของ Gojek'
+  },
+  {
+    symbol: 'SHOP', name: 'Shopify Inc.', country: 'US', market: 'NYSE', sector: 'E-Commerce',
+    description: 'Shopify เป็นแพลตฟอร์มสร้างร้านค้าออนไลน์ที่ได้รับความนิยมมากที่สุด ช่วยให้ SME สร้างเว็บไซต์ขายของได้ง่ายๆ มีลูกค้ากว่า 2 ล้านร้านค้าทั่วโลก รายได้มาจากค่าสมัครรายเดือนและค่าธรรมเนียมการชำระเงิน'
+  },
+  {
+    symbol: 'SQ', name: 'Block Inc.', country: 'US', market: 'NYSE', sector: 'Finance',
+    description: 'Block (เดิมชื่อ Square) เป็นบริษัท Fintech ก่อตั้งโดย Jack Dorsey ผลิตภัณฑ์หลักได้แก่ Square POS สำหรับร้านค้า Cash App สำหรับผู้บริโภค และยังถือหุ้นใน Bitcoin มากพอสมควร'
+  },
+  {
+    symbol: 'PYPL', name: 'PayPal Holdings', country: 'US', market: 'NASDAQ', sector: 'Finance',
+    description: 'PayPal เป็นบริษัทชำระเงินออนไลน์ที่ใหญ่ที่สุดในโลก มีผู้ใช้กว่า 400 ล้านบัญชี รองรับการชำระเงินใน 200+ ประเทศ นอกจากนี้ยังมี Venmo แอปโอนเงินยอดนิยมในสหรัฐฯ'
+  },
+  {
+    symbol: 'CRM', name: 'Salesforce Inc.', country: 'US', market: 'NYSE', sector: 'Technology',
+    description: 'Salesforce เป็นผู้นำตลาด CRM (Customer Relationship Management) ระดับโลก ช่วยบริษัทจัดการข้อมูลลูกค้าและการขาย ผลิตภัณฑ์ครอบคลุม Sales Cloud, Service Cloud, Marketing Cloud และเพิ่งเปิดตัว Einstein AI'
+  },
+  {
+    symbol: 'ORCL', name: 'Oracle Corporation', country: 'US', market: 'NYSE', sector: 'Technology',
+    description: 'Oracle เป็นบริษัทซอฟต์แวร์ระดับองค์กรที่ใหญ่เป็นอันดับ 2 ของโลก เชี่ยวชาญด้าน Database และ ERP Software ปัจจุบันกำลังขยายธุรกิจ Cloud และ AI รวมถึงเป็นพันธมิตรกับ OpenAI'
+  },
+  // === HONG KONG STOCKS ===
+  {
+    symbol: '0700', name: 'Tencent Holdings', country: 'HK', market: 'HKEX', sector: 'Technology',
+    description: 'Tencent เป็นบริษัทเทคโนโลยีที่ใหญ่ที่สุดของจีน ผลิตภัณฑ์หลักได้แก่ WeChat (ซุปเปอร์แอป 1.3 พันล้านผู้ใช้) และเกมออนไลน์ (League of Legends, PUBG Mobile) นอกจากนี้ยังลงทุนในบริษัทเทคฯ มากมายรวมถึง Tesla, Spotify และ Epic Games'
+  },
+  {
+    symbol: '1211', name: 'BYD Company', country: 'HK', market: 'HKEX', sector: 'Auto',
+    description: 'BYD เป็นผู้ผลิตรถยนต์ไฟฟ้าและแบตเตอรี่ที่ใหญ่ที่สุดในโลก มี Warren Buffett เป็นผู้ถือหุ้นใหญ่ ผลิตรถทั้ง EV และ Hybrid รุ่นยอดนิยมได้แก่ Atto 3, Seal และ Dolphin บริษัทยังผลิตแบตเตอรี่ Blade ที่ปลอดภัยมาก'
+  },
+  {
+    symbol: '1810', name: 'Xiaomi Corporation', country: 'HK', market: 'HKEX', sector: 'Technology',
+    description: 'Xiaomi เป็นบริษัทเทคโนโลยีที่ขายสมาร์ทโฟนมากเป็นอันดับ 3 ของโลก จุดเด่นคือราคาถูกแต่สเปคสูง นอกจากนี้ยังมีผลิตภัณฑ์ IoT มากมาย เช่น หุ่นยนต์ดูดฝุ่น กล้องวงจรปิด สายรัดข้อมือ และกำลังผลิตรถยนต์ไฟฟ้า SU7'
+  },
+  {
+    symbol: '3690', name: 'Meituan', country: 'HK', market: 'HKEX', sector: 'Technology',
+    description: 'Meituan เป็นแพลตฟอร์มส่งอาหารและบริการในจีน คล้าย Grab/Foodpanda ครองส่วนแบ่งตลาด Food Delivery กว่า 65% นอกจากนี้ยังมีบริการจอง Hotel ร้านอาหาร และ Bike Sharing'
+  },
+  // === JAPAN STOCKS ===
+  {
+    symbol: '7203', name: 'Toyota Motor', country: 'JP', market: 'TSE', sector: 'Auto',
+    description: 'Toyota เป็นผู้ผลิตรถยนต์ที่ใหญ่ที่สุดในโลก โด่งดังเรื่องความทนทานและน่าเชื่อถือ รุ่นยอดนิยมได้แก่ Camry, Corolla, RAV4 และ Land Cruiser นอกจากนี้ยังเป็นผู้บุกเบิกรถ Hybrid ด้วย Prius และกำลังรุกตลาด EV'
+  },
+  {
+    symbol: '6758', name: 'Sony Group', country: 'JP', market: 'TSE', sector: 'Technology',
+    description: 'Sony เป็นบริษัทอิเล็กทรอนิกส์และความบันเทิงระดับโลก ผลิตภัณฑ์หลักได้แก่ PlayStation, กล้อง, ทีวี และธุรกิจเพลง/ภาพยนตร์ PlayStation 5 เป็นคอนโซลยอดนิยมที่ขายได้กว่า 50 ล้านเครื่อง'
+  },
+  {
+    symbol: '6861', name: 'Keyence Corporation', country: 'JP', market: 'TSE', sector: 'Technology',
+    description: 'Keyence เป็นบริษัทเซ็นเซอร์และระบบอัตโนมัติที่มีกำไรสูงที่สุดในญี่ปุ่น ลูกค้าหลักคือโรงงานที่ต้องการระบบ Automation จุดเด่นคือ Margin กำไรกว่า 50% และไม่มีโรงงานของตัวเอง'
+  },
+  {
+    symbol: '7974', name: 'Nintendo Co.', country: 'JP', market: 'TSE', sector: 'Gaming',
+    description: 'Nintendo เป็นบริษัทเกมระดับตำนาน สร้าง Mario, Zelda, Pokemon และคอนโซล Switch ที่ขายได้กว่า 130 ล้านเครื่อง บริษัทมีแฟนคลับเหนียวแน่นและกำลังเตรียมเปิดตัว Switch 2'
+  },
+  {
+    symbol: '7267', name: 'Honda Motor', country: 'JP', market: 'TSE', sector: 'Auto',
+    description: 'Honda เป็นผู้ผลิตรถยนต์และมอเตอร์ไซค์ชั้นนำ รุ่นยอดนิยมได้แก่ Civic, Accord, CR-V และ City นอกจากนี้ยังมีธุรกิจเครื่องยนต์ และกำลังร่วมมือกับ Sony สร้างรถ EV ชื่อ Afeela'
+  },
+  // === EUROPE STOCKS ===
+  {
+    symbol: 'NOVOB', name: 'Novo Nordisk', country: 'EU', market: 'CPH', sector: 'Healthcare',
+    description: 'Novo Nordisk เป็นบริษัทยาจากเดนมาร์กที่ใหญ่ที่สุดในยุโรป เชี่ยวชาญด้านยารักษาเบาหวานและโรคอ้วน ผลิตภัณฑ์หลักได้แก่ Ozempic และ Wegovy ซึ่งกำลังได้รับความนิยมอย่างมากสำหรับลดน้ำหนัก มูลค่าบริษัทเติบโตกว่า 3 เท่าในช่วง 2 ปีที่ผ่านมา'
+  },
+  {
+    symbol: 'MC', name: 'LVMH Moët Hennessy', country: 'EU', market: 'Euronext Paris', sector: 'Luxury',
+    description: 'LVMH เป็นกลุ่มสินค้าหรูหราที่ใหญ่ที่สุดในโลก ก่อตั้งโดย Bernard Arnault มหาเศรษฐีอันดับ 1 ของโลก แบรนด์ในเครือได้แก่ Louis Vuitton, Dior, Fendi, Givenchy, Tiffany, Bulgari รวมถึงไวน์ Moët และ Hennessy รายได้กว่า 80 พันล้านยูโรต่อปี'
+  },
+  {
+    symbol: 'RMS', name: 'Hermès International', country: 'EU', market: 'Euronext Paris', sector: 'Luxury',
+    description: 'Hermès เป็นแบรนด์หรูระดับตำนานจากฝรั่งเศส โด่งดังจากกระเป๋า Birkin และ Kelly ที่มีราคาหลักล้านบาทและต้องรอคิวซื้อหลายปี สินค้าอื่นๆ ได้แก่ ผ้าพันคอ เครื่องหนัง และน้ำหอม บริษัทมี Margin กำไรสูงที่สุดในอุตสาหกรรม Luxury'
+  },
+  {
+    symbol: 'ASML', name: 'ASML Holding', country: 'EU', market: 'Euronext Amsterdam', sector: 'Technology',
+    description: 'ASML เป็นบริษัทเดียวในโลกที่ผลิตเครื่อง EUV Lithography สำหรับทำชิปขั้นสูง ลูกค้าได้แก่ TSMC, Samsung และ Intel เครื่องแต่ละเครื่องราคากว่า 5 พันล้านบาท ถือเป็น Monopoly ในอุตสาหกรรมเซมิคอนดักเตอร์'
+  },
+  // === SINGAPORE STOCKS ===
+  {
+    symbol: 'D05', name: 'DBS Group Holdings', country: 'SG', market: 'SGX', sector: 'Finance',
+    description: 'DBS เป็นธนาคารที่ใหญ่ที่สุดในเอเชียตะวันออกเฉียงใต้ มีสำนักงานใหญ่ที่สิงคโปร์ ได้รับรางวัล Best Bank in Asia หลายปีซ้อน จุดเด่นคือ Digital Banking ที่ทันสมัยและเสถียรภาพทางการเงินที่แข็งแกร่ง'
+  },
+  {
+    symbol: 'U11', name: 'United Overseas Bank', country: 'SG', market: 'SGX', sector: 'Finance',
+    description: 'UOB เป็นธนาคารชั้นนำของสิงคโปร์ มีสาขาใน 19 ประเทศรวมถึงไทย เน้นลูกค้า SME และ Retail Banking ล่าสุดเข้าซื้อธุรกิจ Consumer Banking ของ Citigroup ในเอเชีย'
+  },
+  // === VIETNAM ===
+  {
+    symbol: 'E1VFVN30', name: 'E1VFVN30 ETF', country: 'VN', market: 'HOSE', sector: 'ETF',
+    description: 'E1VFVN30 เป็น ETF ที่ลงทุนในหุ้น 30 ตัวใหญ่ที่สุดในตลาดหุ้นเวียดนาม ครอบคลุมธนาคาร อสังหาฯ และธุรกิจบริโภค เหมาะสำหรับนักลงทุนที่ต้องการลงทุนในเศรษฐกิจเวียดนามที่เติบโตเร็ว'
+  },
+  {
+    symbol: 'FUEVFVND', name: 'FUEVFVND ETF', country: 'VN', market: 'HOSE', sector: 'ETF',
+    description: 'FUEVFVND เป็น ETF ที่ลงทุนในหุ้นเวียดนามแบบ Diversified ครอบคลุมหลายภาคธุรกิจ เป็นทางเลือกสำหรับนักลงทุนที่ต้องการกระจายความเสี่ยงในตลาด Emerging Market ของเอเชีย'
+  },
 ];
 
 // Stocks Page - shows all underlying securities
@@ -737,8 +879,8 @@ const StocksPage = ({ drList }) => {
   const navigate = useNavigate();
   const [selectedCountry, setSelectedCountry] = useState('All');
 
-  const countries = ['All', 'US', 'HK', 'JP', 'EU', 'SG'];
-  const countryLabels = { 'All': '🌍 ทั้งหมด', 'US': '🇺🇸 สหรัฐฯ', 'HK': '🇭🇰 ฮ่องกง', 'JP': '🇯🇵 ญี่ปุ่น', 'EU': '🇪🇺 ยุโรป', 'SG': '🇸🇬 สิงคโปร์' };
+  const countries = ['All', 'US', 'HK', 'JP', 'EU', 'SG', 'VN'];
+  const countryLabels = { 'All': '🌍 ทั้งหมด', 'US': '🇺🇸 สหรัฐฯ', 'HK': '🇭🇰 ฮ่องกง', 'JP': '🇯🇵 ญี่ปุ่น', 'EU': '🇪🇺 ยุโรป', 'SG': '🇸🇬 สิงคโปร์', 'VN': '🇻🇳 เวียดนาม' };
 
   const filteredStocks = selectedCountry === 'All'
     ? underlyingStocks
@@ -782,7 +924,7 @@ const StocksPage = ({ drList }) => {
                   <h3 className="font-bold text-lg text-black">{stock.symbol}</h3>
                   <p className="text-brutalist-muted text-sm">{stock.name}</p>
                 </div>
-                <span className="text-xs bg-gray-100 border border-black px-2 py-1">{stock.market}</span>
+                <span className="text-xs bg-gray-100 border border-black px-2 py-1 text-black">{stock.market}</span>
               </div>
               <p className="text-sm text-brutalist-muted mb-4">{stock.description}</p>
               <div className="flex items-center justify-between text-xs">
