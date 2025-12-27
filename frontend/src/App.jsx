@@ -948,7 +948,7 @@ const StocksPage = ({ drList }) => {
 };
 
 // Stock Detail Page - shows detailed info about a stock
-const StockDetailPage = ({ drList }) => {
+const StockDetailPage = ({ drList, setSelectedDR }) => {
   const { symbol } = useParams();
   const navigate = useNavigate();
   const stock = underlyingStocks.find(s => s.symbol.toUpperCase() === symbol?.toUpperCase());
@@ -1004,7 +1004,7 @@ const StockDetailPage = ({ drList }) => {
           <h2 className="font-display font-bold text-xl text-black mb-4">DR ที่เกี่ยวข้อง ({relatedDRs.length})</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {relatedDRs.map(dr => (
-              <div key={dr.symbol} className="bg-white border-2 border-black p-4 hover:bg-gray-50 cursor-pointer" onClick={() => navigate('/catalog')}>
+              <div key={dr.symbol} className="bg-white border-2 border-black p-4 hover:bg-gray-50 cursor-pointer hover:shadow-brutal transition-all" onClick={() => setSelectedDR(dr)}>
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">{dr.logo}</span>
                   <div>
@@ -1022,10 +1022,161 @@ const StockDetailPage = ({ drList }) => {
         href={`https://finance.yahoo.com/quote/${stock.symbol}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block bg-primary-500 border-3 border-black shadow-brutal px-6 py-3 text-black font-bold hover:shadow-brutal-lg transition-all"
+        className="inline-block bg-primary-500 border-3 border-black shadow-brutal px-6 py-3 text-black font-bold hover:shadow-brutal-lg transition-all mb-8"
       >
         ดูข้อมูลเพิ่มเติมบน Yahoo Finance →
       </a>
+
+      {/* Detailed Thai Company Analysis */}
+      <div className="bg-white border-3 border-black shadow-brutal p-8">
+        <h2 className="font-display font-bold text-2xl text-black mb-6 border-b-3 border-black pb-3">📊 วิเคราะห์บริษัทเชิงลึก</h2>
+
+        <div className="space-y-6 text-black">
+          <div>
+            <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+              <span className="bg-primary-500 text-black px-2 py-1 text-sm border-2 border-black">1</span>
+              ภาพรวมธุรกิจ
+            </h3>
+            <p className="text-gray-700 leading-relaxed">
+              {stock.symbol === 'AAPL' && 'Apple Inc. ก่อตั้งโดย Steve Jobs, Steve Wozniak และ Ronald Wayne ในปี 1976 ปัจจุบันเป็นหนึ่งในบริษัทเทคโนโลยีที่ทรงอิทธิพลที่สุดในโลก มีมูลค่าตลาดสูงกว่า 3 ล้านล้านดอลลาร์สหรัฐ สำนักงานใหญ่ตั้งอยู่ที่ Cupertino, California บริษัทมีพนักงานมากกว่า 160,000 คนทั่วโลก และมีรายได้ประมาณ 380 พันล้านดอลลาร์ต่อปี Apple ได้สร้างนวัตกรรมที่เปลี่ยนแปลงอุตสาหกรรมหลายครั้ง ตั้งแต่ Macintosh ในปี 1984, iPod ในปี 2001, iPhone ในปี 2007 และ iPad ในปี 2010'}
+              {stock.symbol === 'MSFT' && 'Microsoft Corporation ก่อตั้งโดย Bill Gates และ Paul Allen ในปี 1975 เป็นหนึ่งในบริษัทซอฟต์แวร์ที่ใหญ่ที่สุดในโลก มูลค่าตลาดปัจจุบันเกิน 3 ล้านล้านดอลลาร์ สำนักงานใหญ่ตั้งอยู่ที่ Redmond, Washington มีพนักงานกว่า 220,000 คน รายได้ประจำปีมากกว่า 200 พันล้านดอลลาร์ Microsoft เป็นผู้นำในตลาดระบบปฏิบัติการ (Windows), ซอฟต์แวร์องค์กร (Office 365) และคลาวด์ (Azure)'}
+              {stock.symbol === 'NVDA' && 'NVIDIA Corporation ก่อตั้งโดย Jensen Huang ในปี 1993 โดยมุ่งเน้นการผลิต GPU (Graphics Processing Unit) สำนักงานใหญ่ตั้งอยู่ที่ Santa Clara, California ปัจจุบันมีมูลค่าตลาดเกิน 1 ล้านล้านดอลลาร์ เป็นผู้นำตลาดชิปสำหรับ AI และ Data Center มีส่วนแบ่งตลาดชิป AI มากกว่า 80% รายได้เติบโตอย่างก้าวกระโดดจากกระแส AI Boom พนักงานกว่า 26,000 คนทั่วโลก'}
+              {stock.symbol === 'GOOGL' && 'Alphabet Inc. เป็นบริษัทแม่ของ Google ก่อตั้งในปี 2015 แต่ Google เริ่มต้นมาตั้งแต่ปี 1998 โดย Larry Page และ Sergey Brin ขณะเป็นนักศึกษาที่ Stanford สำนักงานใหญ่ตั้งอยู่ที่ Mountain View, California มูลค่าตลาดเกิน 1.5 ล้านล้านดอลลาร์ Google ครองส่วนแบ่งตลาด Search Engine กว่า 90% ทั่วโลก มีพนักงานกว่า 180,000 คน'}
+              {stock.symbol === 'TSLA' && 'Tesla Inc. ก่อตั้งปี 2003 โดย Martin Eberhard และ Marc Tarpenning แต่ Elon Musk เข้ามาเป็นผู้ถือหุ้นใหญ่และนำบริษัทตั้งแต่ปี 2004 สำนักงานใหญ่ตั้งอยู่ที่ Austin, Texas มูลค่าตลาดกว่า 800 พันล้านดอลลาร์ เป็นผู้นำตลาดรถยนต์ไฟฟ้า มี Gigafactory ในสหรัฐฯ จีน และเยอรมนี พนักงานกว่า 127,000 คนทั่วโลก'}
+              {stock.symbol === '0700' && 'Tencent Holdings ก่อตั้งในปี 1998 โดย Ma Huateng (Pony Ma) ที่เมือง Shenzhen ประเทศจีน มูลค่าตลาดกว่า 400 พันล้านดอลลาร์ เป็นบริษัทเทคโนโลยีที่ใหญ่ที่สุดของจีน และใหญ่เป็นอันดับต้นๆ ของโลก มีผู้ใช้ WeChat กว่า 1.3 พันล้านคนต่อเดือน และเป็นผู้พัฒนาเกมที่ใหญ่ที่สุดในโลก'}
+              {stock.symbol === '1211' && 'BYD Company ก่อตั้งในปี 1995 โดย Wang Chuanfu ในเมือง Shenzhen ประเทศจีน เดิมเป็นผู้ผลิตแบตเตอรี่ก่อนจะขยายเข้าสู่ธุรกิจรถยนต์ไฟฟ้า ปัจจุบันเป็นผู้ผลิต EV รายใหญ่ที่สุดในโลก (แซงหน้า Tesla ในปี 2023) มี Warren Buffett เป็นผู้ถือหุ้นใหญ่ มูลค่าตลาดกว่า 80 พันล้านดอลลาร์'}
+              {stock.symbol === 'NOVOB' && 'Novo Nordisk ก่อตั้งในปี 1923 ที่ประเทศเดนมาร์ก เป็นบริษัทยาที่มีประวัติยาวนานกว่า 100 ปี มูลค่าตลาดปัจจุบันเกิน 400 พันล้านดอลลาร์ ทำให้เป็นบริษัทที่มีมูลค่าสูงที่สุดในยุโรป เชี่ยวชาญด้านยารักษาเบาหวานและโรคอ้วน มีส่วนแบ่งตลาดอินซูลินกว่า 30% ของโลก'}
+              {!['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'TSLA', '0700', '1211', 'NOVOB'].includes(stock.symbol) && `${stock.name} (${stock.symbol}) เป็นบริษัทชั้นนำในอุตสาหกรรม ${stock.sector} จดทะเบียนในตลาด ${stock.market} มีธุรกิจหลักที่เติบโตอย่างแข็งแกร่งและได้รับความสนใจจากนักลงทุนทั่วโลก บริษัทมีฐานลูกค้าที่กว้างขวางและมีแบรนด์ที่เป็นที่รู้จัก`}
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+              <span className="bg-primary-500 text-black px-2 py-1 text-sm border-2 border-black">2</span>
+              สินค้าและบริการหลัก
+            </h3>
+            <p className="text-gray-700 leading-relaxed">
+              {stock.symbol === 'AAPL' && 'ผลิตภัณฑ์หลักของ Apple แบ่งเป็น Hardware ได้แก่ iPhone (รายได้ประมาณ 50%), Mac, iPad, Apple Watch และ AirPods และ Services ได้แก่ App Store, Apple Music, iCloud, Apple TV+ และ Apple Pay ซึ่งเติบโตอย่างต่อเนื่อง ปัจจุบัน Services มีรายได้กว่า 80 พันล้านดอลลาร์ต่อปี และมี Margin กำไรสูงกว่า Hardware มาก'}
+              {stock.symbol === 'MSFT' && 'ผลิตภัณฑ์หลักได้แก่ 1) Intelligent Cloud (Azure, Server products) รายได้กว่า 100 พันล้านดอลลาร์/ปี เติบโต 30%+ 2) Productivity & Business Processes (Office 365, LinkedIn, Dynamics) รายได้กว่า 75 พันล้านดอลลาร์/ปี 3) Personal Computing (Windows, Surface, Xbox, Search) นอกจากนี้ยังมี GitHub และ Copilot AI ที่กำลังเติบโต'}
+              {stock.symbol === 'NVDA' && 'ผลิตภัณฑ์หลักแบ่งเป็น 1) Data Center (H100, A100, DGX) รายได้เกิน 50% ของทั้งหมด เติบโตกว่า 100% จาก AI Boom 2) Gaming (GeForce RTX) 3) Professional Visualization (Quadro) 4) Automotive (DRIVE platform) นอกจากนี้ยังมี CUDA software platform ที่เป็น Lock-in สำหรับนักพัฒนา AI'}
+              {stock.symbol === 'GOOGL' && 'ผลิตภัณฑ์หลักได้แก่ 1) Google Search (รายได้โฆษณากว่า 60%) 2) YouTube (รายได้โฆษณา + Premium subscription) 3) Google Cloud (เติบโต 25%+ ต่อปี) 4) Android OS และ Play Store 5) Google Maps, Gmail, Chrome, Workspace นอกจากนี้ยังมี Other Bets เช่น Waymo (รถไร้คนขับ) และ Verily (Health Tech)'}
+              {stock.symbol === 'TSLA' && 'ผลิตภัณฑ์หลักได้แก่ 1) Electric Vehicles: Model S/X (Luxury), Model 3/Y (Mass market), Cybertruck, Semi 2) Energy: Solar panels, Powerwall, Megapack 3) Services: Supercharger network, Insurance, Full Self-Driving subscription บริษัทมี Gigafactory 6 แห่งทั่วโลก ผลิตรถได้กว่า 2 ล้านคันต่อปี'}
+              {stock.symbol === '0700' && 'ผลิตภัณฑ์หลักได้แก่ 1) WeChat/Weixin (Messaging, Payments, Mini Programs) 2) Games (Honor of Kings, PUBG Mobile, League of Legends) รายได้กว่า 30% 3) FinTech (WeChat Pay, Cloud Banking) 4) Cloud Services 5) Investments ใน Spotify, Tesla, Epic Games, Sea Limited และบริษัทเทคฯ อีกหลายร้อยแห่ง'}
+              {stock.symbol === '1211' && 'ผลิตภัณฑ์หลักได้แก่ 1) New Energy Vehicles: รุ่นยอดนิยม Atto 3, Seal, Dolphin, Han, Tang 2) Blade Battery เทคโนโลยีแบตเตอรี่ที่ปลอดภัยที่สุด 3) Rechargeable Batteries สำหรับอุปกรณ์ต่างๆ 4) Bus และ Truck ไฟฟ้า 5) Rail Transit เทคโนโลยีรถไฟฟ้า'}
+              {stock.symbol === 'NOVOB' && 'ผลิตภัณฑ์หลักได้แก่ 1) Ozempic (GLP-1 สำหรับเบาหวาน Type 2) ยอดขายกว่า 12 พันล้านดอลลาร์/ปี 2) Wegovy (GLP-1 สำหรับลดน้ำหนัก) เติบโตกว่า 100%/ปี 3) Insulin products (NovoRapid, Levemir, Tresiba) 4) Hemophilia products (NovoSeven, NovoEight) ส่วนแบ่งตลาด GLP-1 กว่า 50% ทั่วโลก'}
+              {!['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'TSLA', '0700', '1211', 'NOVOB'].includes(stock.symbol) && `${stock.name} มีสินค้าและบริการที่หลากหลายในอุตสาหกรรม ${stock.sector} โดยมีจุดเน้นที่การสร้างนวัตกรรมและตอบสนองความต้องการของลูกค้า สินค้าหลักได้รับการยอมรับในระดับสากลและมีส่วนแบ่งตลาดที่แข็งแกร่ง`}
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+              <span className="bg-primary-500 text-black px-2 py-1 text-sm border-2 border-black">3</span>
+              จุดแข็งและความได้เปรียบในการแข่งขัน
+            </h3>
+            <p className="text-gray-700 leading-relaxed">
+              {stock.symbol === 'AAPL' && 'จุดแข็งสำคัญได้แก่ 1) Brand Value ที่แข็งแกร่ง - แบรนด์มีมูลค่าสูงที่สุดในโลก 2) Ecosystem Lock-in - ลูกค้าอยู่ในระบบ Apple ยากที่จะย้ายไปใช้แบรนด์อื่น 3) Premium Pricing Power - สามารถตั้งราคาสูงกว่าคู่แข่ง 4) Cash Flow ที่แข็งแกร่ง - มีเงินสดกว่า 160 พันล้านดอลลาร์ 5) Services Growth - รายได้ซ้ำที่เติบโตต่อเนื่อง'}
+              {stock.symbol === 'MSFT' && 'จุดแข็งสำคัญได้แก่ 1) Enterprise Dominance - 95%+ ของบริษัท Fortune 500 ใช้ Azure 2) Productivity Suite Lock-in - Office/Teams เป็นมาตรฐานองค์กร 3) AI Leadership - ลงทุนใน OpenAI และ Copilot ทุก product 4) Recurring Revenue - รายได้กว่า 50% เป็น subscription 5) Diversification - ธุรกิจกระจายดี ไม่พึ่งพิงสินค้าใดสินค้าหนึ่ง'}
+              {stock.symbol === 'NVDA' && 'จุดแข็งสำคัญได้แก่ 1) AI Monopoly - ส่วนแบ่งตลาดชิป AI กว่า 80% 2) CUDA Platform - Developer ecosystem ที่ใหญ่ที่สุด 3) First-mover Advantage - ลงทุนใน AI มากว่า 10 ปี 4) High Margins - Gross margin กว่า 75% 5) Demand >> Supply - ลูกค้าต้องรอคิวซื้อชิป'}
+              {stock.symbol === 'GOOGL' && 'จุดแข็งสำคัญได้แก่ 1) Search Monopoly - ส่วนแบ่งตลาด 90%+ 2) Data Advantage - มีข้อมูลผู้ใช้มากที่สุดในโลก 3) YouTube Dominance - ไม่มีคู่แข่งจริงจัง 4) Cloud Growth - Google Cloud เติบโต 25%+ ต่อปี 5) AI Research - เป็นผู้นำด้าน AI Research (DeepMind, Gemini)'}
+              {stock.symbol === 'TSLA' && 'จุดแข็งสำคัญได้แก่ 1) Brand & Vision - แบรนด์ EV ที่แข็งแกร่งที่สุด 2) Vertical Integration - ควบคุมตั้งแต่ Battery จนถึง Software 3) Supercharger Network - โครงสร้างพื้นฐานที่ใหญ่ที่สุด 4) Software Edge - Full Self-Driving มีข้อมูลมากที่สุด 5) Manufacturing Innovation - Gigapress ลดต้นทุน'}
+              {stock.symbol === '0700' && 'จุดแข็งสำคัญได้แก่ 1) WeChat Ecosystem - Super App ที่แข็งแกร่งที่สุดในโลก 2) Gaming Portfolio - เป็นเจ้าของเกมทำเงินมากที่สุดหลายเกม 3) Investment Portfolio - ลงทุนในบริษัทเทคฯ หลายร้อยแห่ง 4) Payment Dominance - WeChat Pay ครองตลาดจีน 5) User Lock-in - ผู้ใช้ใช้เวลาบน WeChat กว่า 100 นาที/วัน'}
+              {stock.symbol === '1211' && 'จุดแข็งสำคัญได้แก่ 1) Vertical Integration - ควบคุมตั้งแต่ Battery จนถึงรถ 2) Blade Battery - เทคโนโลยีที่ปลอดภัยและถูกกว่าคู่แข่ง 3) Cost Leadership - ต้นทุนต่ำกว่า Tesla มาก 4) China Market - ครองตลาดในประเทศที่ใหญ่ที่สุด 5) Export Growth - กำลังขยายไปยุโรปและเอเชีย'}
+              {stock.symbol === 'NOVOB' && 'จุดแข็งสำคัญได้แก่ 1) GLP-1 Leadership - ส่วนแบ่งตลาดกว่า 50% 2) First-mover Advantage - เป็นผู้บุกเบิกตลาด Obesity drugs 3) R&D Pipeline - มีตัวยาใหม่ในขั้น Clinical Trials หลายตัว 4) Manufacturing Scale - มีโรงงานผลิตทั่วโลก 5) Regulatory Expertise - ได้รับ FDA approvals รวดเร็ว'}
+              {!['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'TSLA', '0700', '1211', 'NOVOB'].includes(stock.symbol) && `${stock.name} มีความได้เปรียบในการแข่งขันจากแบรนด์ที่แข็งแกร่ง ฐานลูกค้าที่กว้างขวาง และนวัตกรรมที่ต่อเนื่อง บริษัทมีทีมผู้บริหารที่มีประสบการณ์และกลยุทธ์ที่ชัดเจนในการเติบโตทั้งในประเทศและต่างประเทศ`}
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+              <span className="bg-primary-500 text-black px-2 py-1 text-sm border-2 border-black">4</span>
+              ความเสี่ยงที่ควรพิจารณา
+            </h3>
+            <p className="text-gray-700 leading-relaxed">
+              {stock.symbol === 'AAPL' && 'ความเสี่ยงสำคัญได้แก่ 1) iPhone Dependence - รายได้ 50% มาจาก iPhone 2) China Exposure - รายได้ 20% มาจากจีน อาจได้รับผลกระทบจากความขัดแย้ง US-China 3) Antitrust Risk - ถูกฟ้องเรื่อง App Store fees 4) Innovation Slowdown - นักวิเคราะห์บางส่วนมองว่านวัตกรรมช้าลง 5) Valuation - PE Ratio สูงกว่าค่าเฉลี่ย'}
+              {stock.symbol === 'MSFT' && 'ความเสี่ยงสำคัญได้แก่ 1) Cloud Competition - แข่งขันรุนแรงกับ AWS และ Google Cloud 2) Regulatory Risk - ถูกตรวจสอบเรื่อง Antitrust หลายครั้ง 3) AI Dependency - ลงทุนหนักใน OpenAI แต่ผลตอบแทนยังไม่ชัด 4) Gaming Challenges - Xbox แข่งขันกับ PlayStation และ Nintendo 5) Valuation - ราคาหุ้นสูงเมื่อเทียบกับการเติบโต'}
+              {stock.symbol === 'NVDA' && 'ความเสี่ยงสำคัญได้แก่ 1) Concentration Risk - รายได้พึ่งพิงลูกค้ารายใหญ่ไม่กี่ราย 2) Competition - AMD และ Intel กำลังไล่ตาม 3) China Restrictions - ถูกห้ามขายชิปขั้นสูงในจีน 4) Valuation Concern - PE Ratio สูงมาก มี Expectation สูง 5) AI Bubble Risk - หากกระแส AI ชะลอลง อุปสงค์อาจลดลง'}
+              {stock.symbol === 'GOOGL' && 'ความเสี่ยงสำคัญได้แก่ 1) Antitrust - ถูกฟ้องในหลายประเทศ อาจต้องแยกธุรกิจ 2) AI Competition - ChatGPT คุกคามตลาด Search 3) Ad Revenue Dependency - รายได้ 80%+ มาจากโฆษณา 4) Privacy Regulations - กฎหมาย Privacy อาจกระทบการเก็บข้อมูล 5) Cloud เป็นอันดับ 3 - ตามหลัง AWS และ Azure'}
+              {stock.symbol === 'TSLA' && 'ความเสี่ยงสำคัญได้แก่ 1) Competition Intensifying - BYD, Toyota, VW กำลังเข้าตลาด EV 2) Pricing Pressure - ลดราคาบ่อยครั้งกระทบ Margin 3) FSD Delays - Full Self-Driving ล่าช้ามาหลายปี 4) Elon Musk Risk - CEO มีกิจการอื่นหลายอย่าง 5) Valuation - PE Ratio สูงมากเมื่อเทียบกับบริษัทรถยนต์อื่น'}
+              {stock.symbol === '0700' && 'ความเสี่ยงสำคัญได้แก่ 1) Regulatory Risk - รัฐบาลจีนควบคุมเข้มงวดมากขึ้น 2) Gaming Restrictions - จำกัดเวลาเล่นเกมของเยาวชน 3) US-China Tensions - อาจถูก Delist จากตลาดสหรัฐฯ 4) Competition - ByteDance, Alibaba แข่งขันรุนแรง 5) Macro Risk - เศรษฐกิจจีนชะลอตัว'}
+              {stock.symbol === '1211' && 'ความเสี่ยงสำคัญได้แก่ 1) Trade Wars - อาจถูกเก็บภาษีในยุโรปและสหรัฐฯ 2) EV Competition - Tesla และบริษัทจีนอื่นแข่งขันรุนแรง 3) Subsidy Dependence - รายได้บางส่วนพึ่งพิงเงินอุดหนุนรัฐ 4) Tech Risk - เทคโนโลยีแบตเตอรี่เปลี่ยนแปลงเร็ว 5) Buffett Selling - Warren Buffett ขายหุ้นลงเรื่อยๆ'}
+              {stock.symbol === 'NOVOB' && 'ความเสี่ยงสำคัญได้แก่ 1) Competition - Eli Lilly มียา Mounjaro/Zepbound แข่งขัน 2) Supply Constraints - ผลิตไม่ทันความต้องการ 3) Patent Expiration - สิทธิบัตรบางตัวจะหมดอายุ 4) Pricing Pressure - รัฐบาลกดดันเรื่องราคายา 5) Valuation - PE Ratio สูงมากเมื่อเทียบกับบริษัทยาอื่น'}
+              {!['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'TSLA', '0700', '1211', 'NOVOB'].includes(stock.symbol) && `ความเสี่ยงที่นักลงทุนควรพิจารณาประกอบด้วย การแข่งขันที่รุนแรงในอุตสาหกรรม ${stock.sector} ความผันผวนของตลาดและอัตราแลกเปลี่ยน รวมถึงความเสี่ยงด้านกฎระเบียบและนโยบายที่อาจส่งผลกระทบต่อธุรกิจ`}
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+              <span className="bg-primary-500 text-black px-2 py-1 text-sm border-2 border-black">5</span>
+              5 สิ่งสำคัญที่นักลงทุนต้องรู้
+            </h3>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              {stock.symbol === 'AAPL' && <>
+                <li>มูลค่าตลาดสูงกว่า 3 ล้านล้านดอลลาร์ - บริษัทที่มีมูลค่าสูงที่สุดในโลก</li>
+                <li>มี Cash Flow ที่แข็งแกร่ง จ่าย Dividend และ Buyback หุ้นสม่ำเสมอ</li>
+                <li>Services เติบโตต่อเนื่อง มี Margin สูงกว่า Hardware</li>
+                <li>ระบบ Ecosystem ที่แข็งแกร่ง ลูกค้ายากที่จะย้ายไปแบรนด์อื่น</li>
+                <li>กำลังลงทุนหนักใน AI, Vision Pro และ Health Technology</li>
+              </>}
+              {stock.symbol === 'MSFT' && <>
+                <li>Azure เป็นผู้นำตลาดคลาวด์อันดับ 2 และกำลังเติบโตเร็วกว่า AWS</li>
+                <li>ลงทุนกว่า 13 พันล้านดอลลาร์ใน OpenAI - ได้เปรียบด้าน AI</li>
+                <li>รายได้กว่า 50% เป็น Recurring Revenue จาก Subscription</li>
+                <li>Copilot AI กำลังถูก Integrate ในทุกผลิตภัณฑ์</li>
+                <li>มี Balance Sheet ที่แข็งแกร่ง AAA Credit Rating</li>
+              </>}
+              {stock.symbol === 'NVDA' && <>
+                <li>ส่วนแบ่งตลาดชิป AI มากกว่า 80% - แทบไม่มีคู่แข่งจริงจัง</li>
+                <li>รายได้เติบโตกว่า 100% ต่อปีจากกระแส AI</li>
+                <li>CUDA Platform เป็น Lock-in สำหรับนักพัฒนา AI</li>
+                <li>Gross Margin สูงกว่า 75% - สูงผิดปกติสำหรับธุรกิจ Hardware</li>
+                <li>ลูกค้ารายใหญ่ต้องรอคิว 6-12 เดือนเพื่อซื้อชิป</li>
+              </>}
+              {stock.symbol === 'GOOGL' && <>
+                <li>ครองตลาด Search มากกว่า 90% ทั่วโลก - เกือบเป็น Monopoly</li>
+                <li>YouTube มีผู้ใช้มากกว่า 2 พันล้านคนต่อเดือน</li>
+                <li>Google Cloud เติบโต 25%+ ต่อปี กำลัง Profitable</li>
+                <li>มี Cash มากกว่า 100 พันล้านดอลลาร์ในงบดุล</li>
+                <li>กำลังถูกฟ้อง Antitrust อาจต้องปรับโครงสร้างบริษัท</li>
+              </>}
+              {stock.symbol === 'TSLA' && <>
+                <li>เป็นผู้นำตลาด EV แต่ส่วนแบ่งตลาดกำลังลดลงจากการแข่งขัน</li>
+                <li>Supercharger Network กลายเป็นมาตรฐานอุตสาหกรรมในสหรัฐฯ</li>
+                <li>Full Self-Driving ยังไม่สามารถทำได้จริง แม้จะสัญญามาหลายปี</li>
+                <li>Energy Business กำลังเติบโตเร็ว อาจกลายเป็นธุรกิจหลักในอนาคต</li>
+                <li>Elon Musk มีกิจการอื่นหลายอย่าง รวมถึง X (Twitter) และ SpaceX</li>
+              </>}
+              {stock.symbol === '0700' && <>
+                <li>WeChat มีผู้ใช้กว่า 1.3 พันล้านคน - Super App ที่ครอบคลุมชีวิตประจำวัน</li>
+                <li>เป็นบริษัทเกมที่ใหญ่ที่สุดในโลก ลงทุนใน Riot, Epic Games และอื่นๆ</li>
+                <li>รัฐบาลจีนจำกัดเวลาเล่นเกมของเยาวชน ส่งผลกระทบต่อรายได้</li>
+                <li>มี Investment Portfolio มูลค่ากว่า 100 พันล้านดอลลาร์</li>
+                <li>เสี่ยงต่อนโยบายควบคุมจากรัฐบาลจีนและความขัดแย้ง US-China</li>
+              </>}
+              {stock.symbol === '1211' && <>
+                <li>ขายรถยนต์ไฟฟ้ามากกว่า Tesla ในปี 2023 - ผู้นำตลาด EV โลก</li>
+                <li>Warren Buffett เป็นผู้ถือหุ้นใหญ่มาตั้งแต่ปี 2008</li>
+                <li>Blade Battery เป็นเทคโนโลยีที่ปลอดภัยและราคาถูกกว่าคู่แข่ง</li>
+                <li>กำลังขยายตลาดไปยุโรป อาจถูกเก็บภาษี Anti-dumping</li>
+                <li>Vertical Integration ช่วยให้ควบคุมต้นทุนได้ดีกว่าคู่แข่ง</li>
+              </>}
+              {stock.symbol === 'NOVOB' && <>
+                <li>Ozempic และ Wegovy กำลังเปลี่ยนวิธีที่โลกรักษาโรคอ้วน</li>
+                <li>มูลค่าตลาดเกิน 400 พันล้านดอลลาร์ - บริษัทใหญ่ที่สุดในยุโรป</li>
+                <li>รายได้เติบโตกว่า 30% ต่อปี - สูงผิดปกติสำหรับบริษัทยา</li>
+                <li>กำลังขยายโรงงานผลิตเพื่อรองรับความต้องการที่พุ่งสูง</li>
+                <li>Eli Lilly เป็นคู่แข่งหลัก มียา Mounjaro/Zepbound ที่แข่งขันโดยตรง</li>
+              </>}
+              {!['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'TSLA', '0700', '1211', 'NOVOB'].includes(stock.symbol) && <>
+                <li>บริษัทเป็นผู้นำในอุตสาหกรรม {stock.sector} มีส่วนแบ่งตลาดที่แข็งแกร่ง</li>
+                <li>รายได้และกำไรเติบโตอย่างต่อเนื่องในช่วงหลายปีที่ผ่านมา</li>
+                <li>มีทีมผู้บริหารที่มีประสบการณ์และกลยุทธ์ที่ชัดเจน</li>
+                <li>กำลังขยายธุรกิจไปยังตลาดใหม่ๆ เพื่อเพิ่มการเติบโต</li>
+                <li>นักลงทุนควรติดตามผลประกอบการและข่าวสารอย่างใกล้ชิด</li>
+              </>}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1111,7 +1262,7 @@ export default function App() {
           <Route path="/compare" element={<ComparePage compareList={compareList} setCompareList={setCompareList} drList={drList} />} />
           <Route path="/screener" element={<ScreenerPage setSelectedDR={setSelectedDR} drList={drList} brokers={brokers} />} />
           <Route path="/stocks" element={<StocksPage drList={drList} />} />
-          <Route path="/stocks/:symbol" element={<StockDetailPage drList={drList} />} />
+          <Route path="/stocks/:symbol" element={<StockDetailPage drList={drList} setSelectedDR={setSelectedDR} />} />
           <Route path="/brokers" element={<BrokersPage drList={drList} brokers={brokers} loading={loading} />} />
         </Routes>
       </main>
