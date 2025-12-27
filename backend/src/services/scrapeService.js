@@ -52,7 +52,7 @@ function detectCountry(market, underlying, symbol) {
   if (market.includes('TSE') || market.includes('TOKYO') || market.includes('JP')) return 'JP';
   if (market.includes('SGX') || market.includes('SINGAPORE')) return 'SG';
   if (market.includes('HOSE') || market.includes('HNX') || market.includes('VN')) return 'VN';
-  if (market.includes('EURONEXT') || market.includes('LSE') || market.includes('XETRA')) return 'EU';
+  if (market.includes('EURONEXT') || market.includes('LSE') || market.includes('XETRA') || market.includes('CPH') || market.includes('OMX') || market.includes('XLON') || market.includes('COPENHAGEN') || market.includes('PARIS') || market.includes('AMSTERDAM')) return 'EU';
   if (market.includes('TWSE') || market.includes('TPEx')) return 'TW';
   if (market.includes('KRX') || market.includes('KOSPI')) return 'KR';
 

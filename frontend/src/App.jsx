@@ -93,6 +93,7 @@ const Navigation = () => {
     { to: '/catalog', label: 'รายการ DR', icon: '📋' },
     { to: '/compare', label: 'เปรียบเทียบ', icon: '⚖️' },
     { to: '/screener', label: 'DR Screener', icon: '🔍' },
+    { to: '/stocks', label: 'หุ้นอ้างอิง', icon: '📚' },
     { to: '/brokers', label: 'โบรกเกอร์', icon: '🏢' }
   ];
 
@@ -266,7 +267,7 @@ const TradingViewChart = ({ symbol, underlying, market }) => {
         'META': 'NASDAQ:META', 'AMZN': 'NASDAQ:AMZN', 'NVDA': 'NASDAQ:NVDA', 'TSLA': 'NASDAQ:TSLA',
         'NFLX': 'NASDAQ:NFLX', 'AMD': 'NASDAQ:AMD', 'INTC': 'NASDAQ:INTC', 'COIN': 'NASDAQ:COIN',
         'PYPL': 'NASDAQ:PYPL', 'ADBE': 'NASDAQ:ADBE', 'PEP': 'NASDAQ:PEP', 'SBUX': 'NASDAQ:SBUX',
-        'COST': 'NASDAQ:COST', 'QQQ': 'NASDAQ:QQQ', 'ASML': 'NASDAQ:ASML', 'AVGO': 'NASDAQ:AVGO',
+        'COST': 'NASDAQ:COST', 'QQQ': 'NASDAQ:QQQ', 'AVGO': 'NASDAQ:AVGO',
         'JD': 'NASDAQ:JD', 'PDD': 'NASDAQ:PDD', 'BIDU': 'NASDAQ:BIDU', 'LI': 'NASDAQ:LI', 'GRAB': 'NASDAQ:GRAB',
         // === US STOCKS - NYSE ===
         'PLTR': 'NYSE:PLTR', 'UBER': 'NYSE:UBER', 'CRM': 'NYSE:CRM', 'ORCL': 'NYSE:ORCL',
@@ -287,7 +288,6 @@ const TradingViewChart = ({ symbol, underlying, market }) => {
         '3347': 'HKEX:3347', 'CNSEMI': 'HKEX:3347',
         '1157': 'HKEX:1157', 'CNROBA': 'HKEX:1157',
         '992': 'HKEX:992', 'LENOVO': 'HKEX:992',
-        'NOVO': 'NYSE:NVO',
         // === JAPAN STOCKS (TSE) ===
         '7203': 'TSE:7203', 'TOYOTA': 'TSE:7203',
         '6758': 'TSE:6758', 'SONY': 'TSE:6758',
@@ -298,6 +298,8 @@ const TradingViewChart = ({ symbol, underlying, market }) => {
         // === EUROPE STOCKS ===
         'MC': 'EURONEXT:MC', 'LVMH': 'EURONEXT:MC',
         'RMS': 'EURONEXT:RMS', 'HERMES': 'EURONEXT:RMS',
+        'ASML': 'EURONEXT:ASML',
+        'NOVOB': 'OMXCOP:NOVO_B', 'NOVO': 'OMXCOP:NOVO_B', 'NVO': 'OMXCOP:NOVO_B',
         // === SINGAPORE STOCKS (SGX) ===
         'D05': 'SGX:D05', 'DBS': 'SGX:D05',
         'U11': 'SGX:U11', 'UOB': 'SGX:U11',
@@ -320,6 +322,8 @@ const TradingViewChart = ({ symbol, underlying, market }) => {
       if (m.includes('HKEX') || m.includes('HK')) return `HKEX:${u}`;
       if (m.includes('TSE') || m.includes('TOKYO') || m.includes('JAPAN')) return `TSE:${u}`;
       if (m.includes('EURONEXT') || m.includes('PARIS') || m.includes('AMSTERDAM')) return `EURONEXT:${u}`;
+      if (m.includes('CPH') || m.includes('OMX') || m.includes('COPENHAGEN')) return `OMXCOP:${u}`;
+      if (m.includes('XETRA') || m.includes('FRA')) return `XETR:${u}`;
       if (m.includes('SGX') || m.includes('SINGAPORE')) return `SGX:${u}`;
       if (m.includes('HOSE') || m.includes('VN') || m.includes('VIETNAM')) return `HOSE:${u}`;
       if (m.includes('NYSE')) return `NYSE:${u}`;
@@ -426,12 +430,13 @@ const DRDetailModal = ({ dr, onClose }) => {
                 >
                   ดูข้อมูลบน Yahoo Finance →
                 </a>
-                <button
-                  className="block w-full text-center bg-white border-2 border-black py-2 text-sm font-bold text-brutalist-muted hover:bg-gray-100 transition-colors cursor-not-allowed"
-                  disabled
+                <Link
+                  to={`/stocks/${dr.underlying?.replace(/\.(HK|T|PA|AS|SI)$/i, '') || dr.symbol?.replace(/\d+$/, '')}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="block w-full text-center bg-white border-2 border-black py-2 text-sm font-bold text-black hover:bg-gray-100 transition-colors"
                 >
-                  📖 อ่านเกี่ยวกับหุ้นตัวนี้ (เร็วๆนี้)
-                </button>
+                  📖 อ่านเกี่ยวกับหุ้นตัวนี้
+                </Link>
               </div>
             </div>
           </div>
@@ -687,6 +692,202 @@ const ScreenerPage = ({ setSelectedDR, drList, brokers }) => {
   );
 };
 
+// Underlying Stocks Data - all securities from DRs
+const underlyingStocks = [
+  // US Stocks - NASDAQ
+  { symbol: 'AAPL', name: 'Apple Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'บริษัทเทคโนโลยีผู้ผลิต iPhone, Mac และบริการดิจิทัล' },
+  { symbol: 'MSFT', name: 'Microsoft Corporation', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'ผู้นำด้านซอฟต์แวร์และคลาวด์คอมพิวติ้ง' },
+  { symbol: 'GOOGL', name: 'Alphabet Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'บริษัทแม่ของ Google และ YouTube' },
+  { symbol: 'META', name: 'Meta Platforms', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'บริษัทแม่ของ Facebook, Instagram และ WhatsApp' },
+  { symbol: 'AMZN', name: 'Amazon.com', country: 'US', market: 'NASDAQ', sector: 'E-Commerce', description: 'ยักษ์ใหญ่อีคอมเมิร์ซและคลาวด์' },
+  { symbol: 'NVDA', name: 'NVIDIA Corporation', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'ผู้นำด้าน GPU และ AI chips' },
+  { symbol: 'TSLA', name: 'Tesla Inc.', country: 'US', market: 'NASDAQ', sector: 'Auto', description: 'ผู้นำรถยนต์ไฟฟ้าและพลังงานสะอาด' },
+  { symbol: 'NFLX', name: 'Netflix Inc.', country: 'US', market: 'NASDAQ', sector: 'Entertainment', description: 'แพลตฟอร์มสตรีมมิ่งชั้นนำของโลก' },
+  { symbol: 'AMD', name: 'Advanced Micro Devices', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'ผู้พัฒนา CPU และ GPU' },
+  { symbol: 'AVGO', name: 'Broadcom Inc.', country: 'US', market: 'NASDAQ', sector: 'Technology', description: 'บริษัทเซมิคอนดักเตอร์และซอฟต์แวร์' },
+  { symbol: 'COST', name: 'Costco Wholesale', country: 'US', market: 'NASDAQ', sector: 'Retail', description: 'ร้านค้าปลีกแบบสมาชิกรายใหญ่' },
+  { symbol: 'COIN', name: 'Coinbase Global', country: 'US', market: 'NASDAQ', sector: 'Finance', description: 'แพลตฟอร์มซื้อขายคริปโตฯ ชั้นนำ' },
+  // US Stocks - NYSE
+  { symbol: 'BABA', name: 'Alibaba Group', country: 'US', market: 'NYSE', sector: 'E-Commerce', description: 'อีคอมเมิร์ซและคลาวด์จีน' },
+  { symbol: 'PLTR', name: 'Palantir Technologies', country: 'US', market: 'NYSE', sector: 'Technology', description: 'บริษัทวิเคราะห์ข้อมูลและ AI' },
+  { symbol: 'UBER', name: 'Uber Technologies', country: 'US', market: 'NYSE', sector: 'Technology', description: 'แพลตฟอร์มเรียกรถและส่งอาหาร' },
+  { symbol: 'NIO', name: 'NIO Inc.', country: 'US', market: 'NYSE', sector: 'Auto', description: 'บริษัทรถยนต์ไฟฟ้าจีน' },
+  // Hong Kong Stocks
+  { symbol: '700', name: 'Tencent Holdings', country: 'HK', market: 'HKEX', sector: 'Technology', description: 'ยักษ์ใหญ่เทคโนโลยีจีน WeChat, Gaming' },
+  { symbol: '1211', name: 'BYD Company', country: 'HK', market: 'HKEX', sector: 'Auto', description: 'ผู้ผลิตรถยนต์ไฟฟ้าและแบตเตอรี่' },
+  { symbol: '1810', name: 'Xiaomi Corporation', country: 'HK', market: 'HKEX', sector: 'Technology', description: 'ผู้ผลิตสมาร์ทโฟนและ IoT' },
+  { symbol: '3690', name: 'Meituan', country: 'HK', market: 'HKEX', sector: 'Technology', description: 'แพลตฟอร์มส่งอาหารและบริการ' },
+  // Japan Stocks
+  { symbol: '7203', name: 'Toyota Motor', country: 'JP', market: 'TSE', sector: 'Auto', description: 'ผู้ผลิตรถยนต์ใหญ่ที่สุดในญี่ปุ่น' },
+  { symbol: '6758', name: 'Sony Group', country: 'JP', market: 'TSE', sector: 'Technology', description: 'บริษัทอิเล็กทรอนิกส์และเกม' },
+  { symbol: '6861', name: 'Keyence Corporation', country: 'JP', market: 'TSE', sector: 'Technology', description: 'ผู้นำเซ็นเซอร์และระบบอัตโนมัติ' },
+  { symbol: '7974', name: 'Nintendo Co.', country: 'JP', market: 'TSE', sector: 'Gaming', description: 'ผู้ผลิตเกมและคอนโซลชื่อดัง' },
+  // Europe Stocks
+  { symbol: 'NOVOB', name: 'Novo Nordisk', country: 'EU', market: 'CPH', sector: 'Healthcare', description: 'ผู้นำยารักษาเบาหวานและโรคอ้วน' },
+  { symbol: 'MC', name: 'LVMH Moët Hennessy', country: 'EU', market: 'Euronext Paris', sector: 'Luxury', description: 'กลุ่มสินค้าหรูหราใหญ่ที่สุดในโลก' },
+  { symbol: 'RMS', name: 'Hermès International', country: 'EU', market: 'Euronext Paris', sector: 'Luxury', description: 'แบรนด์หรูระดับตำนาน' },
+  { symbol: 'ASML', name: 'ASML Holding', country: 'EU', market: 'Euronext Amsterdam', sector: 'Technology', description: 'ผู้ผลิตเครื่องทำชิปเซมิคอนดักเตอร์' },
+  // Singapore
+  { symbol: 'D05', name: 'DBS Group Holdings', country: 'SG', market: 'SGX', sector: 'Finance', description: 'ธนาคารใหญ่ที่สุดในเอเชียตะวันออกเฉียงใต้' },
+  { symbol: 'U11', name: 'United Overseas Bank', country: 'SG', market: 'SGX', sector: 'Finance', description: 'ธนาคารชั้นนำของสิงคโปร์' },
+];
+
+// Stocks Page - shows all underlying securities
+const StocksPage = ({ drList }) => {
+  const navigate = useNavigate();
+  const [selectedCountry, setSelectedCountry] = useState('All');
+
+  const countries = ['All', 'US', 'HK', 'JP', 'EU', 'SG'];
+  const countryLabels = { 'All': '🌍 ทั้งหมด', 'US': '🇺🇸 สหรัฐฯ', 'HK': '🇭🇰 ฮ่องกง', 'JP': '🇯🇵 ญี่ปุ่น', 'EU': '🇪🇺 ยุโรป', 'SG': '🇸🇬 สิงคโปร์' };
+
+  const filteredStocks = selectedCountry === 'All'
+    ? underlyingStocks
+    : underlyingStocks.filter(s => s.country === selectedCountry);
+
+  // Get related DRs for each stock
+  const getRelatedDRs = (underlying) => drList.filter(dr =>
+    dr.underlying?.toUpperCase().includes(underlying.toUpperCase()) ||
+    dr.symbol?.toUpperCase().includes(underlying.toUpperCase())
+  );
+
+  return (
+    <div className="animate-fade-in-up">
+      <div className="mb-6">
+        <h1 className="font-display font-bold text-2xl text-black mb-2">📚 หุ้นอ้างอิง</h1>
+        <p className="text-brutalist-muted">เรียนรู้เกี่ยวกับหุ้นต่างประเทศที่มี DR ซื้อขายในตลาดหลักทรัพย์ไทย</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-6">
+        {countries.map(c => (
+          <button
+            key={c}
+            onClick={() => setSelectedCountry(c)}
+            className={`px-4 py-2 font-bold border-2 border-black transition-all ${selectedCountry === c
+              ? 'bg-primary-500 text-black shadow-brutal'
+              : 'bg-white text-black hover:bg-gray-100'
+              }`}
+          >
+            {countryLabels[c]}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredStocks.map(stock => {
+          const relatedDRs = getRelatedDRs(stock.symbol);
+          return (
+            <div key={stock.symbol} className="bg-white border-3 border-black shadow-brutal p-6 hover:shadow-brutal-lg transition-all">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="font-bold text-lg text-black">{stock.symbol}</h3>
+                  <p className="text-brutalist-muted text-sm">{stock.name}</p>
+                </div>
+                <span className="text-xs bg-gray-100 border border-black px-2 py-1">{stock.market}</span>
+              </div>
+              <p className="text-sm text-brutalist-muted mb-4">{stock.description}</p>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-brutalist-muted">{stock.sector}</span>
+                {relatedDRs.length > 0 && (
+                  <span className="text-primary-500 font-bold">{relatedDRs.length} DR ที่มี</span>
+                )}
+              </div>
+              <button
+                onClick={() => navigate(`/stocks/${stock.symbol}`)}
+                className="mt-4 w-full bg-primary-500 border-2 border-black py-2 text-sm font-bold text-black hover:bg-primary-600 transition-colors"
+              >
+                อ่านเพิ่มเติม →
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Stock Detail Page - shows detailed info about a stock
+const StockDetailPage = ({ drList }) => {
+  const { symbol } = useParams();
+  const navigate = useNavigate();
+  const stock = underlyingStocks.find(s => s.symbol.toUpperCase() === symbol?.toUpperCase());
+  const relatedDRs = drList.filter(dr =>
+    dr.underlying?.toUpperCase().includes(symbol?.toUpperCase()) ||
+    dr.symbol?.toUpperCase().includes(symbol?.toUpperCase())
+  );
+
+  if (!stock) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-brutalist-muted text-lg mb-4">ไม่พบข้อมูลหุ้น {symbol}</p>
+        <button onClick={() => navigate('/stocks')} className="bg-primary-500 border-2 border-black px-6 py-2 text-black font-bold">
+          ← กลับไปหน้าหุ้นอ้างอิง
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="animate-fade-in-up">
+      <button onClick={() => navigate('/stocks')} className="mb-6 text-brutalist-muted hover:text-black font-medium">
+        ← กลับไปหน้าหุ้นอ้างอิง
+      </button>
+
+      <div className="bg-white border-3 border-black shadow-brutal p-8 mb-6">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="font-display font-bold text-3xl text-black mb-2">{stock.name}</h1>
+            <p className="text-brutalist-muted text-lg">{stock.symbol} • {stock.market}</p>
+          </div>
+          <span className="text-sm bg-gray-100 border border-black px-3 py-1">{stock.sector}</span>
+        </div>
+        <p className="text-black text-lg mb-6">{stock.description}</p>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="bg-gray-50 border border-black p-4">
+            <p className="text-brutalist-muted text-sm mb-1">ประเทศ</p>
+            <p className="text-black font-bold">{countryNames[stock.country] || stock.country}</p>
+          </div>
+          <div className="bg-gray-50 border border-black p-4">
+            <p className="text-brutalist-muted text-sm mb-1">ตลาด</p>
+            <p className="text-black font-bold">{stock.market}</p>
+          </div>
+          <div className="bg-gray-50 border border-black p-4">
+            <p className="text-brutalist-muted text-sm mb-1">Sector</p>
+            <p className="text-black font-bold">{stock.sector}</p>
+          </div>
+        </div>
+      </div>
+
+      {relatedDRs.length > 0 && (
+        <div className="mb-6">
+          <h2 className="font-display font-bold text-xl text-black mb-4">DR ที่เกี่ยวข้อง ({relatedDRs.length})</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {relatedDRs.map(dr => (
+              <div key={dr.symbol} className="bg-white border-2 border-black p-4 hover:bg-gray-50 cursor-pointer" onClick={() => navigate('/catalog')}>
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{dr.logo}</span>
+                  <div>
+                    <p className="font-bold text-black">{dr.symbol}</p>
+                    <p className="text-sm text-brutalist-muted">{dr.name}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <a
+        href={`https://finance.yahoo.com/quote/${stock.symbol}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block bg-primary-500 border-3 border-black shadow-brutal px-6 py-3 text-black font-bold hover:shadow-brutal-lg transition-all"
+      >
+        ดูข้อมูลเพิ่มเติมบน Yahoo Finance →
+      </a>
+    </div>
+  );
+};
+
 // Brokers Page
 const BrokersPage = ({ drList, brokers, loading }) => {
   const [selectedBroker, setSelectedBroker] = useState(null);
@@ -767,6 +968,8 @@ export default function App() {
           <Route path="/catalog" element={<CatalogPage setSelectedDR={setSelectedDR} compareList={compareList} setCompareList={setCompareList} drList={drList} loading={loading} />} />
           <Route path="/compare" element={<ComparePage compareList={compareList} setCompareList={setCompareList} drList={drList} />} />
           <Route path="/screener" element={<ScreenerPage setSelectedDR={setSelectedDR} drList={drList} brokers={brokers} />} />
+          <Route path="/stocks" element={<StocksPage drList={drList} />} />
+          <Route path="/stocks/:symbol" element={<StockDetailPage drList={drList} />} />
           <Route path="/brokers" element={<BrokersPage drList={drList} brokers={brokers} loading={loading} />} />
         </Routes>
       </main>
