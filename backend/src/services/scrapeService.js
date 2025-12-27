@@ -61,6 +61,10 @@ function detectCountry(market, underlying, symbol) {
   if (/^(BABA|JD|PDD|BIDU|NIO)/.test(underlying)) return 'CN';
   if (/^(TENCENT|XIAOMI|MEITUAN|BYD)/.test(underlying)) return 'HK';
   if (/^(TOYOTA|SONY|NINTENDO|HONDA)/.test(underlying)) return 'JP';
+  if (/^(NOVOB|NOVO|NVO|ASML|MC|RMS|LVMH|HERMES)/.test(underlying)) return 'EU';
+
+  // Check by DR symbol patterns (e.g., NOVOB80, ASML01)
+  if (/^(NOVOB|ASML|LVMH|HERMES)/.test(symbol?.toUpperCase() || '')) return 'EU';
 
   return 'US'; // Default
 }
