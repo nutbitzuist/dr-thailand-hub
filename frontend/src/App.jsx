@@ -246,24 +246,70 @@ const NewsSection = ({ symbol }) => {
   );
 };
 
-// Simple Price Chart Component
-const MiniChart = () => (
-  <div className="h-40 w-full bg-gray-100/30 rounded-2xl border border-dark-800 flex items-center justify-center relative overflow-hidden">
-    <div className="absolute inset-0 opacity-20">
-      <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path d="M0,80 L20,75 L40,85 L60,40 L80,50 L100,20 L100,100 L0,100 Z" fill="url(#grad)" />
-        <defs>
-          <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" style={{ stopColor: '#10b981', stopOpacity: 0.5 }} />
-            <stop offset="100%" style={{ stopColor: '#10b981', stopOpacity: 0 }} />
-          </linearGradient>
-        </defs>
-        <path d="M0,80 L20,75 L40,85 L60,40 L80,50 L100,20" fill="none" stroke="#10b981" strokeWidth="2" />
-      </svg>
+// TradingView Chart Component
+const TradingViewChart = ({ symbol, underlying }) => {
+  const containerId = `tradingview_${symbol}`;
+
+  useEffect(() => {
+    // Determine the correct TradingView symbol
+    const getTVSymbol = () => {
+      if (!underlying) return 'NASDAQ:AAPL';
+      const u = underlying.toUpperCase();
+      // Map common symbols to their TradingView format
+      const symbolMap = {
+        'AAPL': 'NASDAQ:AAPL', 'MSFT': 'NASDAQ:MSFT', 'GOOGL': 'NASDAQ:GOOGL', 'GOOG': 'NASDAQ:GOOG',
+        'META': 'NASDAQ:META', 'AMZN': 'NASDAQ:AMZN', 'NVDA': 'NASDAQ:NVDA', 'TSLA': 'NASDAQ:TSLA',
+        'NFLX': 'NASDAQ:NFLX', 'AMD': 'NASDAQ:AMD', 'INTC': 'NASDAQ:INTC', 'COIN': 'NASDAQ:COIN',
+        'PLTR': 'NYSE:PLTR', 'UBER': 'NYSE:UBER', 'PYPL': 'NASDAQ:PYPL', 'CRM': 'NYSE:CRM',
+        'ORCL': 'NYSE:ORCL', 'ADBE': 'NASDAQ:ADBE', 'DIS': 'NYSE:DIS', 'V': 'NYSE:V',
+        'MA': 'NYSE:MA', 'JPM': 'NYSE:JPM', 'BAC': 'NYSE:BAC', 'WMT': 'NYSE:WMT',
+        'JNJ': 'NYSE:JNJ', 'PG': 'NYSE:PG', 'KO': 'NYSE:KO', 'PEP': 'NASDAQ:PEP',
+        'MCD': 'NYSE:MCD', 'NKE': 'NYSE:NKE', 'SBUX': 'NASDAQ:SBUX', 'COST': 'NASDAQ:COST',
+        'QQQ': 'NASDAQ:QQQ', 'SPY': 'AMEX:SPY',
+        // Hong Kong stocks
+        '9988': 'HKEX:9988', 'BABA': 'NYSE:BABA', '700': 'HKEX:700', 'TENCENT': 'HKEX:700',
+        '1810': 'HKEX:1810', 'XIAOMI': 'HKEX:1810', '3690': 'HKEX:3690', 'MEITUAN': 'HKEX:3690',
+        // Japan stocks
+        '7203': 'TSE:7203', 'TOYOTA': 'TSE:7203', '6758': 'TSE:6758', 'SONY': 'TSE:6758',
+        // China ADRs
+        'JD': 'NASDAQ:JD', 'PDD': 'NASDAQ:PDD', 'BIDU': 'NASDAQ:BIDU', 'NIO': 'NYSE:NIO',
+      };
+      return symbolMap[u] || `NASDAQ:${u}`;
+    };
+
+    const script = document.createElement('script');
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      symbol: getTVSymbol(),
+      width: '100%',
+      height: '100%',
+      locale: 'th_TH',
+      dateRange: '1D',
+      colorTheme: 'light',
+      isTransparent: true,
+      autosize: true,
+      largeChartUrl: ''
+    });
+
+    const container = document.getElementById(containerId);
+    if (container) {
+      container.innerHTML = '';
+      container.appendChild(script);
+    }
+
+    return () => {
+      if (container) container.innerHTML = '';
+    };
+  }, [symbol, underlying, containerId]);
+
+  return (
+    <div className="h-48 w-full bg-white border-2 border-black overflow-hidden">
+      <div id={containerId} className="tradingview-widget-container h-full w-full"></div>
     </div>
-    <p className="text-xs text-brutalist-muted">Price Trend (Intraday)</p>
-  </div>
-);
+  );
+};
+
 
 // DR Detail Modal
 const DRDetailModal = ({ dr, onClose }) => {
@@ -277,7 +323,7 @@ const DRDetailModal = ({ dr, onClose }) => {
         <div className="p-6 space-y-8">
           <div className="bg-white border-3 border-black shadow-brutal p-6"><div className="flex items-end justify-between"><div><p className="text-brutalist-muted text-sm mb-1">ราคาล่าสุด</p><p className="font-display font-bold text-4xl text-black">฿{dr.price?.toLocaleString()}</p></div><div className={`text-right ${priceClass}`}><p className="text-2xl font-bold">{dr.changePercent > 0 ? '+' : ''}{dr.changePercent?.toFixed(2)}%</p><p className="text-sm">{dr.change > 0 ? '+' : ''}{dr.change?.toFixed(2)} บาท</p></div></div></div>
 
-          <MiniChart />
+          <TradingViewChart symbol={dr.symbol} underlying={dr.underlying} />
 
           <div className="grid lg:grid-cols-2 gap-8">
             <div className="space-y-6">
