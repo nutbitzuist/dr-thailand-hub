@@ -75,7 +75,7 @@ const BlogPage = () => {
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     onError={(e) => {
                                         e.target.onerror = null;
-                                        e.target.src = `https://placehold.co/400x200/f3f4f6/374151?text=${encodeURIComponent(post.title?.substring(0, 20) || 'Blog')}`;
+                                        e.target.src = 'https://placehold.co/400x200/f3f4f6/374151?text=DR+Blog';
                                     }}
                                 />
                             </div>
