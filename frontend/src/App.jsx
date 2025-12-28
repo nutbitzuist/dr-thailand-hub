@@ -920,7 +920,6 @@ const StocksPage = ({ drList }) => {
       '6098': ['RECRUIT19'],
       '6367': ['DAIKIN19'],
       '4543': ['TERUMO19'],
-      '7974': ['NINTENDO19'],
       '8031': ['MITSUI19'],
       '8058': ['MITSUB19'],
       '8001': ['ITOCHU19'],
@@ -940,16 +939,18 @@ const StocksPage = ({ drList }) => {
       'MBG': ['MERCEDES01'],
       'VOW': ['VW01'],
       'ADS': ['ADIDAS01'],
+      // Europe Healthcare
+      'NOVOB': ['NOVO80'],
       // Vietnam & Singapore
       'E1VFVN30': ['E1VFVN3001'],
       'FUEVFVND': ['FUEVFVND01'],
-      'D05': ['DBS'], // Usually no DR yet? Or maybe DBS bank? Keeping placeholder.
-      'U11': ['UOB'],
+      'D05': ['DBS19'],
+      'U11': ['UOB19'],
       // US Tech (Direct Map)
       'TSLA': ['TSLA80'],
       'AAPL': ['AAPL80'],
       'NVDA': ['NVDA80'],
-      'GOOGL': ['GOOGL80'],
+      'GOOGL': ['GOOGL80', 'GOOGL01'],
       'MSFT': ['MSFT80'],
       'AMZN': ['AMZN80'],
       'META': ['META80'],
@@ -970,7 +971,7 @@ const StocksPage = ({ drList }) => {
       'MA': ['MA80'],
       'CRM': ['CRM80'],
       'ADBE': ['ADBE80'],
-      'ORCL': ['ORCL80'],
+      'ORCL': ['ORCL80', 'ORCL01'],
       'AMD': ['AMD80'],
       'INTC': ['INTC80'],
       'QCOM': ['QCOM80'],
@@ -983,7 +984,6 @@ const StocksPage = ({ drList }) => {
       'AMGN': ['AMGN80'],
       'HON': ['HON80'],
       'UNH': ['UNH80'],
-      'LIN': ['LIN80'],
       'MCD': ['MCD80'],
       'NKE': ['NKE80'],
       'PM': ['PM80'],
@@ -998,6 +998,20 @@ const StocksPage = ({ drList }) => {
       'IBM': ['IBM80'],
       'T': ['T80'],
       'VZ': ['VZ80'],
+      // US Stocks - Additional (previously missing)
+      'COIN': ['COIN80'],
+      'PDD': ['PDD80'],
+      'NIO': ['NIO80'],
+      'XPEV': ['XPEV80'],
+      'LI': ['LI80'],
+      'GRAB': ['GRAB80'],
+      'SHOP': ['SHOP80'],
+      'SQ': ['SQ80'],
+      'PYPL': ['PYPL80'],
+      'PLTR': ['PLTR80'],
+      'UBER': ['UBER80'],
+      'JD': ['JD80'],
+      'BABA': ['BABA80'],
     };
 
     // If manual mapping exists, prioritize it

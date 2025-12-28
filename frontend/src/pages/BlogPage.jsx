@@ -73,6 +73,10 @@ const BlogPage = () => {
                                     src={post.image}
                                     alt={post.title}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = `https://placehold.co/400x200/f3f4f6/374151?text=${encodeURIComponent(post.title?.substring(0, 20) || 'Blog')}`;
+                                    }}
                                 />
                             </div>
 
@@ -90,7 +94,7 @@ const BlogPage = () => {
                                 </p>
                                 <div className="mt-auto pt-4 border-t-2 border-gray-100 flex items-center justify-between">
                                     <span className="font-bold text-sm text-black">อ่านต่อ →</span>
-                                    <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded border border-black text-black">By {post.author}</span>
+                                    <span className="text-xs font-mono bg-gray-200 px-2 py-1 rounded border-2 border-black text-gray-900 font-semibold shadow-sm">By {post.author}</span>
                                 </div>
                             </div>
                         </Link>
