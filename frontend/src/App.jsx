@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, NavLink, Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { drAPI, brokerAPI } from './services/api';
+import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
 
 // Country names mapping - ordered by importance (major markets first)
 const countryNames = { US: 'สหรัฐฯ', HK: 'ฮ่องกง', JP: 'ญี่ปุ่น', EU: 'ยุโรป', SG: 'สิงคโปร์', VN: 'เวียดนาม', CN: 'จีน', TW: 'ไต้หวัน', KR: 'เกาหลีใต้' };
@@ -94,6 +96,7 @@ const Navigation = () => {
     { to: '/compare', label: 'เปรียบเทียบ', icon: '⚖️' },
     { to: '/screener', label: 'DR Screener', icon: '🔍' },
     { to: '/stocks', label: 'หุ้นอ้างอิง', icon: '📚' },
+    { to: '/blog', label: 'ความรู้', icon: '🎓' },
     { to: '/brokers', label: 'โบรกเกอร์', icon: '🏢' }
   ];
 
@@ -1270,6 +1273,8 @@ export default function App() {
           <Route path="/screener" element={<ScreenerPage setSelectedDR={setSelectedDR} drList={drList} brokers={brokers} />} />
           <Route path="/stocks" element={<StocksPage drList={drList} />} />
           <Route path="/stocks/:symbol" element={<StockDetailPage drList={drList} setSelectedDR={setSelectedDR} />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/brokers" element={<BrokersPage drList={drList} brokers={brokers} loading={loading} />} />
         </Routes>
       </main>
