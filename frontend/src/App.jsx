@@ -875,15 +875,34 @@ const underlyingStocks = [
     symbol: 'FUEVFVND', name: 'FUEVFVND ETF', country: 'VN', market: 'HOSE', sector: 'ETF',
     description: 'FUEVFVND เป็น ETF ที่ลงทุนในหุ้นเวียดนามแบบ Diversified ครอบคลุมหลายภาคธุรกิจ เป็นทางเลือกสำหรับนักลงทุนที่ต้องการกระจายความเสี่ยงในตลาด Emerging Market ของเอเชีย'
   },
+  // === TAIWAN STOCKS ===
+  {
+    symbol: 'TSM', name: 'Taiwan Semiconductor (TSMC)', country: 'TW', market: 'NYSE/TWSE', sector: 'Technology',
+    description: 'TSMC (Taiwan Semiconductor Manufacturing Company) เป็นโรงงานผลิตชิปที่ใหญ่ที่สุดในโลก ผลิตชิปให้กับ Apple, NVIDIA, AMD, Qualcomm และบริษัทชั้นนำอื่นๆ มีส่วนแบ่งตลาด Foundry กว่า 55% ของโลก เป็นบริษัทที่มีมูลค่าสูงที่สุดในเอเชีย และมีเทคโนโลยีการผลิตชิปขั้นสูงที่สุด (3nm, 5nm) ที่คู่แข่งอย่าง Samsung และ Intel ยังตามไม่ทัน'
+  },
+  {
+    symbol: '2330', name: 'TSMC (Taiwan Listed)', country: 'TW', market: 'TWSE', sector: 'Technology',
+    description: 'TSMC หุ้นที่จดทะเบียนในตลาดหลักทรัพย์ไต้หวัน (TWSE) เป็นหุ้นตัวเดียวกับ TSM ที่ซื้อขายในสหรัฐฯ แต่ซื้อขายเป็นเงินไต้หวันดอลลาร์ (TWD) บริษัทเป็นผู้ผลิตเซมิคอนดักเตอร์แบบ Contract Manufacturing รายใหญ่ที่สุดของโลก'
+  },
+  {
+    symbol: 'FOXCONN', name: 'Hon Hai Precision (Foxconn)', country: 'TW', market: 'TWSE', sector: 'Technology',
+    description: 'Hon Hai หรือที่รู้จักในชื่อ Foxconn เป็นบริษัทผลิตอิเล็กทรอนิกส์แบบ OEM ที่ใหญ่ที่สุดในโลก เป็นผู้ประกอบ iPhone ให้ Apple และผลิตอุปกรณ์ให้กับบริษัทเทคโนโลยีชั้นนำ มีโรงงานทั่วโลกและพนักงานกว่า 1 ล้านคน'
+  },
+  // === CHINA A-SHARES ===
+  {
+    symbol: 'CSI300', name: 'CSI 300 Index', country: 'CN', market: 'SSE/SZSE', sector: 'Index',
+    description: 'CSI 300 เป็นดัชนีหุ้นที่สำคัญที่สุดของจีน ประกอบด้วยหุ้น 300 ตัวที่มีขนาดใหญ่และสภาพคล่องสูงสุดในตลาดเซี่ยงไฮ้ (SSE) และเซินเจิ้น (SZSE) ครอบคลุมหลายภาคธุรกิจ ถือเป็นตัวแทนของเศรษฐกิจจีนแผ่นดินใหญ่ที่ดีที่สุด'
+  },
 ];
+
 
 // Stocks Page - shows all underlying securities
 const StocksPage = ({ drList }) => {
   const navigate = useNavigate();
   const [selectedCountry, setSelectedCountry] = useState('All');
 
-  const countries = ['All', 'US', 'HK', 'JP', 'EU', 'SG', 'VN'];
-  const countryLabels = { 'All': '🌍 ทั้งหมด', 'US': '🇺🇸 สหรัฐฯ', 'HK': '🇭🇰 ฮ่องกง', 'JP': '🇯🇵 ญี่ปุ่น', 'EU': '🇪🇺 ยุโรป', 'SG': '🇸🇬 สิงคโปร์', 'VN': '🇻🇳 เวียดนาม' };
+  const countries = ['All', 'US', 'HK', 'JP', 'EU', 'SG', 'VN', 'CN', 'TW'];
+  const countryLabels = { 'All': '🌍 ทั้งหมด', 'US': '🇺🇸 สหรัฐฯ', 'HK': '🇭🇰 ฮ่องกง', 'JP': '🇯🇵 ญี่ปุ่น', 'EU': '🇪🇺 ยุโรป', 'SG': '🇸🇬 สิงคโปร์', 'VN': '🇻🇳 เวียดนาม', 'CN': '🇨🇳 จีน', 'TW': '🇹🇼 ไต้หวัน' };
 
   const filteredStocks = selectedCountry === 'All'
     ? underlyingStocks
@@ -1012,6 +1031,12 @@ const StocksPage = ({ drList }) => {
       'UBER': ['UBER80'],
       'JD': ['JD80'],
       'BABA': ['BABA80'],
+      // Taiwan
+      'TSM': ['TSM80', 'TSMC80'],
+      '2330': ['TSM80', 'TSMC80'],
+      'FOXCONN': ['FOXCONN80'],
+      // China A-Shares
+      'CSI300': ['CSI300'],
     };
 
     // If manual mapping exists, prioritize it
