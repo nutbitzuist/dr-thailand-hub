@@ -889,8 +889,126 @@ const StocksPage = ({ drList }) => {
     ? underlyingStocks
     : underlyingStocks.filter(s => s.country === selectedCountry);
 
-  // Get related DRs for each stock - improved matching with suffix handling
+  // Get related DRs for each stock - improved matching with manual overrides
   const getRelatedDRs = (stockSymbol) => {
+    // Manual mapping for cases where automatic matching might fail or numeric codes differ
+    const manualMap = {
+      // HK Stocks
+      '0700': ['TENCENT80'],
+      '1211': ['BYDCOM80'],
+      '1810': ['XIAOMI80'],
+      '9618': ['JD80'],
+      '9988': ['BABA80'],
+      '3690': ['MEITUAN80'],
+      '2318': ['PINGAN80'],
+      '1299': ['AIA80'],
+      // Japan Stocks
+      '7974': ['NINTENDO19'],
+      '7203': ['TOYOTA19'],
+      '6758': ['SONY19'],
+      '6861': ['KEYENCE19'],
+      '7267': ['HONDA19'],
+      '9983': ['FASTRET19'],
+      '9984': ['SFTBANK19'],
+      '8035': ['TEL19'],
+      '4063': ['SHINET19'],
+      '6146': ['DISCO19'],
+      '6920': ['ASR19'],
+      '6501': ['HITACHI19'],
+      '6902': ['DENSO19'],
+      '7741': ['HOYA19'],
+      '6098': ['RECRUIT19'],
+      '6367': ['DAIKIN19'],
+      '4543': ['TERUMO19'],
+      '7974': ['NINTENDO19'],
+      '8031': ['MITSUI19'],
+      '8058': ['MITSUB19'],
+      '8001': ['ITOCHU19'],
+      // Europe
+      'MC': ['LVMH01'],
+      'RMS': ['HERMES80'],
+      'ASML': ['ASML01'],
+      'KER': ['KERING01'],
+      'OR': ['LOREAL01'],
+      'SAP': ['SAP01'],
+      'LIN': ['LINDE01'],
+      'AIR': ['AIRBUS01'],
+      'SIE': ['SIEMENS01'],
+      'DTE': ['DTE01'],
+      'ALV': ['ALLIANZ01'],
+      'BMW': ['BMW01'],
+      'MBG': ['MERCEDES01'],
+      'VOW': ['VW01'],
+      'ADS': ['ADIDAS01'],
+      // Vietnam & Singapore
+      'E1VFVN30': ['E1VFVN3001'],
+      'FUEVFVND': ['FUEVFVND01'],
+      'D05': ['DBS'], // Usually no DR yet? Or maybe DBS bank? Keeping placeholder.
+      'U11': ['UOB'],
+      // US Tech (Direct Map)
+      'TSLA': ['TSLA80'],
+      'AAPL': ['AAPL80'],
+      'NVDA': ['NVDA80'],
+      'GOOGL': ['GOOGL80'],
+      'MSFT': ['MSFT80'],
+      'AMZN': ['AMZN80'],
+      'META': ['META80'],
+      'NFLX': ['NFLX80'],
+      'SBUX': ['SBUX80'],
+      'BA': ['BA80'],
+      'DIS': ['DIS80'],
+      'JNJ': ['JNJ80'],
+      'KO': ['KO80'],
+      'PEP': ['PEP80'],
+      'PG': ['PG80'],
+      'WMT': ['WMT80'],
+      'XOM': ['XOM80'],
+      'CVX': ['CVX80'],
+      'BAC': ['BAC80'],
+      'JPM': ['JPM80'],
+      'V': ['V80'],
+      'MA': ['MA80'],
+      'CRM': ['CRM80'],
+      'ADBE': ['ADBE80'],
+      'ORCL': ['ORCL80'],
+      'AMD': ['AMD80'],
+      'INTC': ['INTC80'],
+      'QCOM': ['QCOM80'],
+      'TXN': ['TXN80'],
+      'AVGO': ['AVGO80'],
+      'COST': ['COST80'],
+      'TMUS': ['TMUS80'],
+      'CMCSA': ['CMCSA80'],
+      'CSCO': ['CSCO80'],
+      'AMGN': ['AMGN80'],
+      'HON': ['HON80'],
+      'UNH': ['UNH80'],
+      'LIN': ['LIN80'],
+      'MCD': ['MCD80'],
+      'NKE': ['NKE80'],
+      'PM': ['PM80'],
+      'LOW': ['LOW80'],
+      'UPS': ['UPS80'],
+      'RTX': ['RTX80'],
+      'LMT': ['LMT80'],
+      'CAT': ['CAT80'],
+      'DE': ['DE80'],
+      'GE': ['GE80'],
+      'MMM': ['MMM80'],
+      'IBM': ['IBM80'],
+      'T': ['T80'],
+      'VZ': ['VZ80'],
+    };
+
+    // If manual mapping exists, prioritize it
+    if (manualMap[stockSymbol]) {
+      const targetSymbols = manualMap[stockSymbol];
+      // Find DRs that match the mapped symbols
+      const mappedDRs = drList.filter(dr => targetSymbols.includes(dr.symbol));
+      // Only return if we actually found matches, otherwise fall back to fuzzy logic
+      if (mappedDRs.length > 0) return mappedDRs;
+    }
+
     const cleanSymbol = stockSymbol.toUpperCase().replace(/\.(HK|T|PA|AS|SI)$/i, '');
     return drList.filter(dr => {
       const drUnderlying = (dr.underlying || '').toUpperCase().replace(/\.(HK|T|PA|AS|SI)$/i, '');

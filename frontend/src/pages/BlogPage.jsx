@@ -32,8 +32,8 @@ const BlogPage = () => {
                     <button
                         onClick={() => setSelectedCategory('All')}
                         className={`px-5 py-3 border-3 border-black font-bold transition-all shadow-brutal ${selectedCategory === 'All'
-                                ? 'bg-black text-white'
-                                : 'bg-white text-black hover:translate-y-[-2px] hover:shadow-brutal-lg'
+                            ? 'bg-black text-white'
+                            : 'bg-white text-black hover:translate-y-[-2px] hover:shadow-brutal-lg'
                             }`}
                     >
                         📌 ทั้งหมด
@@ -43,8 +43,8 @@ const BlogPage = () => {
                             key={cat.id}
                             onClick={() => setSelectedCategory(cat.id)}
                             className={`px-5 py-3 border-3 border-black font-bold transition-all shadow-brutal flex items-center space-x-2 ${selectedCategory === cat.id
-                                    ? 'bg-primary-500 text-black'
-                                    : 'bg-white text-black hover:translate-y-[-2px] hover:shadow-brutal-lg'
+                                ? 'bg-primary-500 text-black'
+                                : 'bg-white text-black hover:translate-y-[-2px] hover:shadow-brutal-lg'
                                 }`}
                         >
                             <span>{cat.icon}</span>
@@ -89,8 +89,8 @@ const BlogPage = () => {
                                     {post.excerpt}
                                 </p>
                                 <div className="mt-auto pt-4 border-t-2 border-gray-100 flex items-center justify-between">
-                                    <span className="font-bold text-sm">อ่านต่อ →</span>
-                                    <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded border border-black">By {post.author}</span>
+                                    <span className="font-bold text-sm text-black">อ่านต่อ →</span>
+                                    <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded border border-black text-black">By {post.author}</span>
                                 </div>
                             </div>
                         </Link>
