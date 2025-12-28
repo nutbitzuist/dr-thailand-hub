@@ -62,6 +62,34 @@ export default {
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            'code::before': {
+              content: '""',
+            },
+            'code::after': {
+              content: '""',
+            },
+            code: {
+              color: '#000000',
+              backgroundColor: '#e5e7eb',
+              padding: '2px 4px',
+              borderRadius: '4px',
+              fontWeight: '600',
+            },
+            pre: {
+              backgroundColor: '#1f2937',
+              color: '#f3f4f6',
+            },
+            'pre code': {
+              backgroundColor: 'transparent',
+              color: 'inherit',
+              padding: '0',
+            },
+          },
+        },
+      },
     },
   },
   plugins: [
