@@ -1,0 +1,15 @@
+{
+    "buildCommand": "npm run build:frontend",
+    "installCommand": "npm run install:frontend",
+    "outputDirectory": "frontend/dist",
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://dr-thailand-hub-backend-production.up.railway.app/api/:path*"
+        },
+        {
+            "source": "/((?!api|assets|favicon|.*\\..*).*)",
+            "destination": "frontend/index.html"
+        }
+    ]
+}
