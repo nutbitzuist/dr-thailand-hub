@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="DR Thailand Hub - ศูนย์ข้อมูล DR ครบวงจร ค้นหา เปรียบเทียบ และติดตาม Depositary Receipt ในตลาดหลักทรัพย์ไทย" />
+    <meta name="keywords" content="DR, Depositary Receipt, หุ้นต่างประเทศ, SET, ตลาดหลักทรัพย์, ลงทุน, หุ้น" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>DR Thailand Hub - ศูนย์ข้อมูล DR ครบวงจร</title>
+    <!-- InsightHub Analytics -->
+    <script>
+    (function(){
+      var s='ih_75d74cbe53a1',e='https://kokwhiuryawyuyusglll.supabase.co/functions/v1/collect';
+      var v=localStorage.getItem('_ih_vid')||'v_'+Math.random().toString(36).substr(2,15);
+      localStorage.setItem('_ih_vid',v);
+      var d=sessionStorage.getItem('_ih_sid')||'s_'+Math.random().toString(36).substr(2,15);
+      sessionStorage.setItem('_ih_sid',d);
+      var p={events:[{name:'page_view',timestamp:Date.now(),properties:{url:location.href,path:location.pathname,title:document.title,referrer:document.referrer},context:{viewport_width:innerWidth,viewport_height:innerHeight,screen_width:screen.width,screen_height:screen.height,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,language:navigator.language}}],session:{id:d,is_new:!sessionStorage.getItem('_ih_seen')},visitor:{id:v,is_new:!localStorage.getItem('_ih_ret')},site_id:s};
+      sessionStorage.setItem('_ih_seen','1');localStorage.setItem('_ih_ret','1');
+      navigator.sendBeacon?navigator.sendBeacon(e,JSON.stringify(p)):fetch(e,{method:'POST',body:JSON.stringify(p),keepalive:true});
+    })();
+    </script>
+    <!-- End InsightHub Analytics -->
+  </head>
+  <body class="bg-dark-950 text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
